@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: secquest
+      POSTGRES_USER: secquest
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - secquest-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U secquest -d secquest"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://secquest:${POSTGRES_PASSWORD}@db:5432/secquest
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3000}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      SMTP_URL: ${SMTP_URL:-}
+      MAIL_FROM: ${MAIL_FROM:-SecQuest <noreply@example.com>}
+volumes:
+  secquest-postgres:

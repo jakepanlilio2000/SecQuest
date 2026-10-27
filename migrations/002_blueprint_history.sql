@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS blueprint_revisions (exam_code TEXT NOT NULL REFERENCES exam_versions(code), revision TEXT NOT NULL, data TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(exam_code,revision));

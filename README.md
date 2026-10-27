@@ -1,0 +1,90 @@
+# SecQuest
+
+A working, independent Security+ learning workspace aligned to the publicly available **SY0-801 V8 objectives, document v2.0**, checked on **October 27, 2026**.
+
+This release is an operational foundation, not completion of the entire master brief. It contains **44 original starter questions across all 27 objectives**, six question formats, persistent adaptive review, timed mock practice, and two defensive simulations. The 600-question target and independent subject-matter approval are **not complete**. See [implementation status](docs/STATUS.md) and [content provenance](docs/CONTENT.md).
+
+## Run locally on Windows
+
+Requires Node.js 22.13+ (tested with the supplied Node 26.12 runtime). No WAMP, PHP, database service, AI key, or Docker installation is needed for the SQLite development path.
+
+```powershell
+npm ci --cache .npm-cache
+npm run content:validate
+npm run db:migrate
+npm run db:seed
+npm run dev
+```
+
+Open **http://127.0.0.1:3000** and create an account. Onboarding selects SY0-801, a daily goal, and an optional target date. There are no default accounts or passwords. Progress is stored in `data/secquest.sqlite`, not browser storage. Do not remove this file after starting real study.
+
+The app also initializes migrations and missing starter records on its first API request. Seed operations do not replace existing question revisions or editorial changes.
+
+`.env.example` describes configuration. Copy it to `.env` only when needed. Leave `DATABASE_URL` blank for SQLite. CLI scripts load the environment supplied by the shell; Next loads `.env` for its runtime. For external Postgres CLI use, set `$env:DATABASE_URL` explicitly or run Node with `--env-file=.env` before the script.
+
+The Windows compatibility preload only handles restricted hosts where `os.userInfo()` is denied. It gives tooling a temporary-directory label and is not used for authentication or authorization.
+
+## What works
+
+- Registration, scrypt password hashing, hashed server sessions, sign-out, profile/preferences, data export and password-confirmed account deletion.
+- Learning, filtered practice, recovery, daily review, ten-minute challenge, and configurable timed mock sessions.
+- Single/scenario, multiple response, matching, ordering, and fictional log analysis. Each starter question has a definition, option-specific rationales, and at least two examples.
+- Wrong answers enter a durable review schedule automatically and return after 3–8 intervening items when enough eligible session items remain. Otherwise they are deferred. Recent retries do not count as new mastery evidence.
+- Mock drafts autosave. Correctness and explanations are absent from active exam payloads. Server time enforces expiry; the report appears after final submission or expiry.
+- First-encounter/retry/delayed-recall analytics, objective coverage, XP with unique reward events, ranks, and four actual achievements.
+- Searchable concept library, typo-tolerant lookup, deterministic concept companion, personal spaced flashcards, editable study-day plans, skill tree, two graded simulations.
+- Restricted content dashboard with a JSON question editor, immutable revisions, separate-author review approval, publication states, atomic JSON/CSV import, export, coverage matrix, source register, audit history, and versioned exam configuration.
+- Knowledge gaps and misconception evidence, a directed concept map with prerequisite paths, schedule-based retention forecasts, and a private Markdown notebook with autosave, conflict recovery, contextual saves, search, folders/tags and export. Start from the new sidebar sections; administrators manage mappings under Account settings → Content administration.
+
+The [intelligent learning implementation report](INTELLIGENT_LEARNING_IMPLEMENTATION.md) records architecture, mapping coverage, model limitations, migration verification and rollback instructions. Forecasts are uncalibrated heuristics and remain nonnumeric without sufficient delayed-review evidence. The original grading and review scheduler remain in place.
+
+For an existing database, back it up before first starting this release: `npm run db:backup -- data/backups/before-upgrade.sqlite` (backup tool requires Node 22.16+). Migration 004 is additive. Run `npm run db:verify -- data/backups/before-upgrade.sqlite.manifest.json` immediately after seeding to compare original rows, then `npm run intelligence:backfill` for historical evidence. No learner records are reset.
+
+## Verify
+
+```powershell
+npm test
+npm run typecheck
+npm run content:validate
+npm run build
+npm start
+```
+
+The automated unit/integration suite uses isolated temporary SQLite databases and synthetic accounts. It exercises real database writes and route handlers. Desktop and mobile Playwright scenarios are included:
+
+```powershell
+# On a machine configured for Playwright browser execution:
+npx playwright install chromium
+npm run test:e2e
+```
+
+Browser QA in this implementation used the connected browser tool; the standalone Playwright runner is included but was not executed in this environment. Docker/Postgres and SMTP delivery also require deployment-environment verification. See [QA evidence](docs/QA.md).
+
+## Content administration
+
+Register an account, then run:
+
+```powershell
+npm run admin:create
+```
+
+Enter the registered email to promote the account. Open **Settings → Content administration**. New and edited content starts as Draft. The author cannot approve their own revision. Create a second reviewer/editor account through the operator tooling for proper separation. `scripts/create-admin.ts` can assign learner, reviewer, content administrator, or system administrator; the default is system administrator.
+
+Question imports accept a JSON array, or CSV with one `content` column containing quoted JSON question objects. Exported CSV follows that format. Import validation is transactional; no rows are inserted if any row fails. Consult `content/questions.ts` and `src/lib/types.ts` for the schema.
+
+## Deploy
+
+PostgreSQL is the deployment database. Redis is intentionally unnecessary for this release: rate limits, queues, and rewards are durable database records, avoiding cross-process in-memory state. A typed repository using bound SQL parameters supports both PostgreSQL and SQLite; Prisma is not required.
+
+See [deployment guide](docs/DEPLOYMENT.md), [architecture](docs/ARCHITECTURE.md), and [security notes](docs/SECURITY.md).
+
+```powershell
+# Set POSTGRES_PASSWORD in .env first; use a URL-safe random value.
+docker compose up --build -d
+# Development container with live source updates:
+docker compose -f compose.yaml -f compose.dev.yaml up --build
+```
+
+This application runs as a Node service; placing it under WAMP's document root does not make it a PHP application. Use the local Node port or configure Apache as a reverse proxy. For public deployment, use HTTPS, set the canonical `APP_ORIGIN`, set `COOKIE_SECURE=true`, and provide backups and monitoring.
+
+CompTIA and Security+ are their respective owners' marks. SecQuest is unofficial, offers original educational material, and does not supply actual examination questions or predict an official passing score.

@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      target: dependencies
+    command: ["node", "node_modules/next/dist/bin/next", "dev", "--hostname", "0.0.0.0"]
+    environment:
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: "1"
+    volumes:
+      - .:/app
+      - secquest-node-modules:/app/node_modules
+      - secquest-next:/app/.next
+volumes:
+  secquest-node-modules:
+  secquest-next:

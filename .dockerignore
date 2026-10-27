@@ -1,0 +1,11 @@
+node_modules
+.next
+.npm-cache
+.git
+.env*
+data
+test-results
+playwright-report
+docs/screenshots
+data-objectives.pdf
+*.tsbuildinfo
