@@ -1,4 +1,6 @@
 "use client";
+import { EmailStatus } from "./completion";
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
 import { useModalFocus } from "./use-modal-focus";
@@ -35,14 +37,14 @@ export function Landing({
   return (
     <div className="landing">
       <header className="landing-header">
-        <a className="brand" href="/">
+        <Link className="brand" href="/">
           <span className="brand-icon">
             <ShieldCheck size={26} />
           </span>
           <span>
             sec<span className="brand-accent">quest</span>
           </span>
-        </a>
+        </Link>
         <span className="landing-nav">
           Learn with purpose. Practice with context.
         </span>
@@ -385,12 +387,14 @@ export function Settings({
   logout,
   go,
   notify,
+  appearance,
 }: {
   user: Profile;
   setUser: (u: Profile | null) => void;
   logout: () => Promise<void>;
   go: (s: string) => void;
   notify: (s: string) => void;
+  appearance?: { id: string; name: string; xp: number; unlocked: boolean }[];
 }) {
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
@@ -419,6 +423,8 @@ export function Settings({
                   theme: f.get("theme"),
                   targetDate: f.get("date") || "",
                   reducedMotion: f.get("motion") === "on",
+                  accent: f.get("accent") || "blue",
+                  sounds: f.get("sounds") === "on",
                 },
               });
               setUser(r.user);
@@ -485,6 +491,34 @@ export function Settings({
               Reduce animations
             </label>
           </div>
+          <div className="form-grid">
+            <label>
+              Learning accent
+              <select
+                name="accent"
+                defaultValue={user.settings.accent ?? "blue"}
+              >
+                {(
+                  appearance ?? [
+                    { id: "blue", name: "Analyst blue", xp: 0, unlocked: true },
+                  ]
+                ).map((a) => (
+                  <option key={a.id} value={a.id} disabled={!a.unlocked}>
+                    {a.name}
+                    {a.unlocked ? "" : ` · unlock at ${a.xp} XP`}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                name="sounds"
+                defaultChecked={!!user.settings.sounds}
+              />
+              Optional answer sounds
+            </label>
+          </div>
           <Button type="submit" disabled={busy}>
             Save preferences <Check size={16} />
           </Button>
@@ -492,6 +526,7 @@ export function Settings({
       </section>
       <section className="panel settings-panel">
         <h2>Account security</h2>
+        <EmailStatus />
         <form
           className="form-grid"
           onSubmit={async (e) => {

@@ -18,6 +18,8 @@ import {
   recordForecastOutcome,
 } from "./retention-forecast";
 import { loadGraph, loadPolicy } from "./intelligence-store";
+import { syncLearningAchievements } from "./progression";
+import { loadReviewPolicy } from "./review-policy";
 import type {
   Attempt,
   Confidence,
@@ -89,6 +91,7 @@ export async function startSession(
   return database.transaction(async (tx) => {
     await lockUser(tx, user);
     const exam = await currentBlueprint(tx);
+    const reviewPolicy = await loadReviewPolicy(tx);
     let bank = await published(tx);
     if (settings.conceptId) {
       const links = await tx.all<{ question_id: string; revision: number }>(
@@ -189,6 +192,7 @@ export async function startSession(
           actualCount: selected.length,
           exam: blueprint.code,
           blueprintRevision: exam.revision,
+          reviewPolicyVersion: reviewPolicy.version,
         }),
         "active",
         now.toISOString(),
@@ -228,7 +232,17 @@ async function recordAttempt(
     "SELECT * FROM review_schedules WHERE user_id=? AND question_id=?",
     [user, q.id],
   );
-  const next = schedule(previous, correct, confidence, now, !!item.retry);
+  const policyVersion =
+    (JSON.parse(s.settings) as { reviewPolicyVersion?: string })
+      .reviewPolicyVersion ?? "sm2-inspired-v1";
+  const next = schedule(
+    previous,
+    correct,
+    confidence,
+    now,
+    !!item.retry,
+    await loadReviewPolicy(tx, policyVersion),
+  );
   const attemptId = randomUUID();
   const duration = item.shown_at
     ? Math.max(
@@ -285,10 +299,11 @@ async function recordAttempt(
     xp += await addXP(tx, user, `first:${q.id}`, 10, now.toISOString());
   if (correct && previous?.lapses)
     xp += await addXP(tx, user, `recovery:${q.id}`, 5, now.toISOString());
-  if (next.retention)
+  if (correct && next.retention)
     xp += await addXP(tx, user, `retention:${q.id}`, 15, now.toISOString());
-  if (next.retention && previous?.lapses)
+  if (correct && next.retention && previous?.lapses)
     await award(tx, user, "mistake-breaker", now.toISOString());
+  await syncLearningAchievements(tx, user, now);
   return {
     attemptId,
     correct,
@@ -355,6 +370,7 @@ async function complete(
   }
   if (s.mode === "mock" && Number(n?.n ?? 0) > 0)
     await award(tx, user, "mock-complete", now.toISOString());
+  await syncLearningAchievements(tx, user, now);
 }
 async function expire(tx: Database, user: string, s: Session) {
   if (

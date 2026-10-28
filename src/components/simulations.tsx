@@ -42,7 +42,7 @@ export function Simulations({ onRefresh }: { onRefresh: () => Promise<void> }) {
       />
       {error && <div className="alert error">{error}</div>}
       <div className="lab-grid">
-        {sims.map((s) => (
+        {sims.map((s, index) => (
           <button
             key={s.id}
             className={`panel lab-card ${active?.id === s.id ? "selected" : ""}`}
@@ -57,7 +57,7 @@ export function Simulations({ onRefresh }: { onRefresh: () => Promise<void> }) {
                 icon={s.id === "firewall" ? Network : ShieldCheck}
                 size={49}
               />
-              <span>SIMULATION {s.id === "firewall" ? "01" : "02"}</span>
+              <span>SIMULATION {String(index + 1).padStart(2, "0")}</span>
             </span>
             <Badge tone="blue">OBJECTIVE {s.objective}</Badge>
             <h2>{s.name}</h2>

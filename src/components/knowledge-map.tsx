@@ -26,7 +26,7 @@ export function KnowledgeMap({
     [domain, setDomain] = useState(""),
     [focused, setFocused] = useState(true),
     [relations, setRelations] = useState(false),
-    [zoom, setZoom] = useState(0.65),
+    [zoom, setZoom] = useState(0.8),
     [pan, setPan] = useState({ x: 25, y: 35 }),
     [skips, setSkips] = useState<string[]>([]);
   const drag = useRef<{
@@ -41,7 +41,15 @@ export function KnowledgeMap({
     if (!data) return { nodes: [], edges: [], width: 700, height: 500 };
     let ids = new Set(data.graph.nodes.map((n) => n.id));
     if (focused) {
-      ids = new Set([...data.path.map((p) => p.concept.id), selected]);
+      ids = new Set([selected]);
+      for (let depth = 0; depth < 2; depth++)
+        for (const target of [...ids])
+          for (const edge of data.graph.edges)
+            if (
+              (edge.kind === "prerequisite" || edge.kind === "builds_on") &&
+              edge.targetId === target
+            )
+              ids.add(edge.sourceId);
       for (const e of data.graph.edges)
         if (e.sourceId === selected || e.targetId === selected) {
           ids.add(e.sourceId);
@@ -152,7 +160,7 @@ export function KnowledgeMap({
             checked={focused}
             onChange={(e) => setFocused(e.target.checked)}
           />
-          Focus on target path
+          Nearby prerequisites
         </label>
         <label className="checkbox-label">
           <input

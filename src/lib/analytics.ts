@@ -3,6 +3,8 @@ import { blueprint } from "./content";
 import type { Attempt, Review, Session, Feedback } from "./types";
 import { rankFor } from "./types";
 import { evidenceMastery } from "./mastery";
+import { extraAchievements, accents } from "./progression";
+import { learningInsights, wilsonInterval } from "./learning-insights";
 export const achievements = [
   {
     id: "first-defense",
@@ -29,6 +31,7 @@ export const achievements = [
     description: "Solve the incident triage simulation without a mistake.",
     icon: "flag",
   },
+  ...extraAchievements,
 ];
 const pct = (a: Attempt[]) =>
   a.length
@@ -187,10 +190,16 @@ export async function overview(user: string) {
   const ready =
     firsts.length >= 30 &&
     mockSessions.length > 0 &&
-    retention.length >= 5 &&
+    retention.filter((a) => a.correct).length >= 5 &&
     coverage >= 0.6;
   return {
     xp,
+    appearance: accents.map((a) => ({ ...a, unlocked: xp >= a.xp })),
+    insights: learningInsights(attempts),
+    firstAccuracyInterval: wilsonInterval(
+      firsts.filter((a) => a.correct).length,
+      firsts.length,
+    ),
     rank: rankFor(xp),
     totalQuestions: Number(count?.n ?? 0),
     uniqueAttempted: firsts.length,

@@ -8,6 +8,7 @@ import {
 } from "../content/intelligence";
 import { sources } from "../content/sources";
 import { validateGraph } from "../src/lib/knowledge-graph";
+import { simulations } from "../content/simulations";
 const seen = new Set<string>();
 for (const q of questions) {
   validateQuestion(q);
@@ -78,3 +79,19 @@ for (const m of misconceptions)
   console.log(
     `${m.id}: ${new Set(distractorMappings.filter((d) => d.misconceptionId === m.id).map((d) => d.questionId)).size} distinct mapped questions`,
   );
+if (new Set(simulations.map((s) => s.id)).size !== simulations.length)
+  throw Error("Duplicate simulation ID.");
+for (const simulation of simulations) {
+  if (!blueprint.objectives.some((o) => o.id === simulation.objective))
+    throw Error("Invalid simulation objective.");
+  if (
+    new Set(simulation.tasks.map((t) => t.id)).size !== simulation.tasks.length
+  )
+    throw Error("Duplicate simulation task.");
+  for (const task of simulation.tasks)
+    if (!simulation.choices.includes(task.answer) || !task.why)
+      throw Error("Invalid simulation answer or explanation.");
+}
+console.log(
+  `${simulations.length} fictional simulations validated; no live targets or production learning events generated.`,
+);

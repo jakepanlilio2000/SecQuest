@@ -39,6 +39,21 @@ import { sources } from "../../content/sources";
 import type { Question, User } from "./types";
 import { intelligenceRoutes } from "./intelligence-api";
 import { exportNotebook } from "./notebook";
+import {
+  consumeVerification,
+  issueVerification,
+  verificationStatus,
+} from "./email-verification";
+import {
+  accents,
+  claimMission,
+  leaderboard,
+  progressionFor,
+  setLeaderboardPreference,
+} from "./progression";
+import { loadGraph } from "./intelligence-store";
+import { loadReviewPolicy, reviewPolicySchema } from "./review-policy";
+import { duplicateCandidates } from "./content-similarity";
 function validateQuestion(input: unknown) {
   try {
     return validateContentQuestion(input);
@@ -251,6 +266,12 @@ export async function handle(req: Request) {
         );
         if (!row) throw new AppError("Reset link is invalid or expired.");
         await lockUser(tx, row.user_id);
+        const available = await first(
+          tx,
+          "SELECT token_hash FROM reset_tokens WHERE token_hash=? AND user_id=? AND expires_at>?",
+          [hashToken(token), row.user_id, new Date().toISOString()],
+        );
+        if (!available) throw new AppError("Reset link is invalid or expired.");
         await tx.run("UPDATE users SET password_hash=? WHERE id=?", [
           hashed,
           row.user_id,
@@ -261,6 +282,14 @@ export async function handle(req: Request) {
         ]);
       });
       return json({ message: "Password updated. Sign in to continue." });
+    }
+    if (path === "auth/verify-email" && method === "POST") {
+      const { token } = z
+        .object({ token: z.string().regex(/^[a-f0-9]{64}$/) })
+        .parse(await body(req));
+      if (!(await limit(`verify:${hashToken(token)}`, 10, 3600)))
+        throw new AppError("Too many verification attempts.", 429);
+      return json(await consumeVerification(token));
     }
     const user = await getUser(req);
     if (!user) throw new AppError("Sign in to continue.", 401);
@@ -286,6 +315,61 @@ export async function handle(req: Request) {
     }
     if (!(await limit(`api:${user.id}`, 600, 60)))
       throw new AppError("Too many requests. Please slow down.", 429);
+    if (path === "verification" && method === "GET")
+      return json(await verificationStatus(user.id));
+    if (path === "verification" && method === "POST") {
+      if (!process.env.SMTP_URL)
+        throw new AppError(
+          "Email delivery is not configured. Ask the operator to configure SMTP.",
+          503,
+        );
+      if (!(await limit(`verification:${user.id}`, 3, 3600)))
+        throw new AppError("Try again later.", 429);
+      const token = await issueVerification(user.id);
+      try {
+        const { default: nodemailer } = await import("nodemailer");
+        await nodemailer.createTransport(process.env.SMTP_URL).sendMail({
+          from: process.env.MAIL_FROM,
+          to: user.email,
+          subject: "Verify your SecQuest email",
+          text: `Verify your email within 24 hours: ${process.env.APP_ORIGIN ?? url.origin}/?verify=${token}`,
+        });
+      } catch {
+        await db().transaction((tx) =>
+          tx.run("DELETE FROM email_verification_tokens WHERE token_hash=?", [
+            hashToken(token),
+          ]),
+        );
+        throw new AppError(
+          "Verification email could not be delivered. Try again later.",
+          503,
+        );
+      }
+      return json({
+        message: "Verification link sent. It expires in 24 hours.",
+      });
+    }
+    if (path === "progression" && method === "GET")
+      return json(await progressionFor(user.id));
+    if (path === "progression/claim" && method === "POST") {
+      const { mission } = z
+        .object({ mission: z.enum(["explore", "retrieve", "consistency"]) })
+        .parse(await body(req));
+      return json(await claimMission(user.id, mission));
+    }
+    if (path === "progression/leaderboard" && method === "GET")
+      return json({ entries: await leaderboard() });
+    if (path === "progression/leaderboard" && method === "POST") {
+      const input = z
+        .object({
+          enabled: z.boolean(),
+          alias: z.string().trim().min(2).max(40),
+        })
+        .parse(await body(req));
+      return json(
+        await setLeaderboardPreference(user.id, input.enabled, input.alias),
+      );
+    }
     const intelligenceResponse = await intelligenceRoutes(
       req,
       url,
@@ -441,7 +525,35 @@ export async function handle(req: Request) {
           ]),
         ).values(),
       );
-      return json({ terms, sources });
+      const graph = await loadGraph();
+      const linked = terms.map((t) => ({
+        ...t,
+        conceptId:
+          graph.nodes.find((c) => c.name === t.term)?.id ??
+          graph.mappings.find((m) => m.question_id === t.questionId)
+            ?.concept_id ??
+          null,
+      }));
+      const additional = graph.nodes
+        .filter((c) => !linked.some((t) => t.conceptId === c.id))
+        .map((c) => ({
+          term: c.name,
+          definition: c.definition,
+          explanation: c.explanation,
+          examples: c.examples,
+          misconception:
+            "Use the concept map to compare prerequisites and related ideas. Unassessed knowledge is not demonstrated weakness.",
+          objective: c.objectives[0],
+          sources: c.references,
+          questionId: "",
+          conceptId: c.id,
+        }));
+      return json({
+        terms: [...linked, ...additional].sort((a, b) =>
+          a.term.localeCompare(b.term),
+        ),
+        sources,
+      });
     }
     if (path === "tutor" && method === "POST") {
       const { query } = z
@@ -674,16 +786,29 @@ export async function handle(req: Request) {
             reducedMotion: z.boolean().optional(),
             targetDate: z.string().max(10).optional(),
             avatar: z.string().max(8).optional(),
+            accent: z.enum(["blue", "forest", "amber", "violet"]).optional(),
+            sounds: z.boolean().optional(),
           }),
         })
         .parse(await body(req));
-      await db().transaction((tx) =>
-        tx.run("UPDATE users SET name=?,settings=? WHERE id=?", [
+      await db().transaction(async (tx) => {
+        await lockUser(tx, user.id);
+        const required = accents.find(
+          (a) => a.id === (input.settings.accent ?? "blue"),
+        )!.xp;
+        const xp = await first<{ xp: number }>(
+          tx,
+          "SELECT COALESCE(SUM(amount),0) AS xp FROM xp_events WHERE user_id=?",
+          [user.id],
+        );
+        if (Number(xp?.xp ?? 0) < required)
+          throw new AppError("This accent has not been unlocked yet.", 403);
+        await tx.run("UPDATE users SET name=?,settings=? WHERE id=?", [
           input.name,
           JSON.stringify(input.settings),
           user.id,
-        ]),
-      );
+        ]);
+      });
       return json({
         user: safeUser({
           ...user,
@@ -725,6 +850,9 @@ export async function handle(req: Request) {
         "simulation_attempts",
         "xp_events",
         "user_achievements",
+        "email_verifications",
+        "leaderboard_preferences",
+        "notebook_flashcards",
       ])
         exportData[table] = await db().all(
           `SELECT * FROM ${table} WHERE user_id=?`,
@@ -764,6 +892,47 @@ export async function handle(req: Request) {
         { deleted: true },
         { headers: { "Set-Cookie": cookie("", 0) } },
       );
+    }
+    if (path === "admin/review-policy") {
+      role(user, reviewers);
+      if (method === "GET") return json({ policy: await loadReviewPolicy() });
+      if (method === "POST") {
+        role(user, ["system_admin"]);
+        const policy = reviewPolicySchema.parse(await body(req));
+        if (policy.version === "sm2-inspired-v1")
+          throw new AppError("The original review policy is immutable.", 409);
+        await db().transaction(async (tx) => {
+          await lockUser(tx, user.id);
+          if (process.env.DATABASE_URL?.startsWith("postgres"))
+            await tx.run("SELECT pg_advisory_xact_lock(726303)");
+          await tx.run(
+            "INSERT INTO review_policies(version,data,created_by,created_at) VALUES (?,?,?,?)",
+            [
+              policy.version,
+              JSON.stringify(policy),
+              user.id,
+              new Date().toISOString(),
+            ],
+          );
+          await audit(
+            tx,
+            user.id,
+            "review.policy.version",
+            policy.version,
+            policy,
+          );
+        });
+        return json({ saved: true });
+      }
+    }
+    if (path === "admin/duplicates" && method === "GET") {
+      role(user, reviewers);
+      const rows = await db().all<{ content: string }>(dbAdminQuery);
+      return json({
+        candidates: duplicateCandidates(rows.map((r) => JSON.parse(r.content))),
+        method:
+          "Token similarity within the same objective; review assistance, not semantic correctness or an automatic rejection.",
+      });
     }
     if (path === "admin" && method === "GET") {
       role(user, reviewers);

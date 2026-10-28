@@ -13,3 +13,13 @@ Content security policy denies framing, object origins via default-src, external
 Store only email, display name, preferences, and learning records. No real security target data is collected. Simulation addresses use documentation ranges and all scenarios are fictional. Tutor retrieval uses stored content and transmits no queries to an external AI provider. Database backups may contain personal data and require restricted, encrypted storage and a defined deletion/retention policy.
 
 The starter content publication exception is documented in CONTENT.md. Import/schema validation is not a proof of technical correctness. This project has not received an independent penetration test, external accessibility audit, or production load test.
+
+## Completion security/privacy
+
+Verification tokens are hashed, expiring, single-use and resend-throttled; consumption rechecks under the account lock. Failed SMTP delivery removes the generated token and returns a safe error. Recovery tokens likewise recheck inside the lock. Existing unverified accounts remain usable; a mandatory verification gate would require a separate rollout policy and working delivery.
+
+Notebook history/restore/card endpoints are owner-scoped and retain stale-write checks. Archived linked questions are allowed only through the note owner's own session. New private tables cascade on account deletion and appear only in owner export. Weekly claims lock the account and use unique reward keys. Accent unlocks are checked server-side. Optional board sharing defaults off; only chosen alias, opaque public ID, rank and XP are returned, never email/owner ID/notebook data. Sounds require saved opt-in and no external audio request.
+
+Review policy writes require system administrator; immutable versions are validated/audited. Lexical duplicate suggestions never automatically delete/reject content. Existing origin/JSON/Zod/role boundaries and mock answer redaction remain.
+
+Production dependency audit is clean; three low development-only advisory findings remain in the latest official shadcn registry/deepmerge chain without an offered fix. Only the trusted official registry was used. Independent penetration testing, SMTP security/delivery and deployment TLS acceptance remain outstanding.

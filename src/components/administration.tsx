@@ -5,6 +5,7 @@ import { Check, ShieldCheck } from "lucide-react";
 
 import type { Question } from "@/lib/types";
 import { IntelligenceAdmin } from "./intelligence-admin";
+import { CompletionAdmin } from "./completion-admin";
 import {
   Profile,
   Source,
@@ -83,6 +84,7 @@ export function Admin({ user }: { user: Profile }) {
             <p>{data.seedReview}</p>
           </div>
           <IntelligenceAdmin user={user} />
+          <CompletionAdmin user={user} />
           {user.role === "system_admin" && (
             <section className="panel">
               <h2>Versioned exam configuration</h2>

@@ -1,5 +1,21 @@
 import type { Confidence, Review } from "./types";
 export const DAY = 86_400_000;
+export interface ReviewPolicy {
+  version: string;
+  intervals: [number, number, number, number];
+  minimumIndependentHours: number;
+  failureMinutes: number;
+  minimumEase: number;
+  maximumEase: number;
+}
+export const defaultReviewPolicy: ReviewPolicy = {
+  version: "sm2-inspired-v1",
+  intervals: [1, 3, 7, 14],
+  minimumIndependentHours: 24,
+  failureMinutes: 15,
+  minimumEase: 1.3,
+  maximumEase: 3,
+};
 // SM-2-inspired schedule. Short-term retries are separate from long-term retrieval.
 export function schedule(
   previous: Review | undefined,
@@ -7,11 +23,13 @@ export function schedule(
   confidence: Confidence,
   now: Date,
   isShortRetry: boolean,
+  policy: ReviewPolicy = defaultReviewPolicy,
 ) {
   const elapsed = previous
     ? now.getTime() - Date.parse(previous.last_at)
     : Infinity;
-  const independent = elapsed >= DAY && !isShortRetry;
+  const independent =
+    elapsed >= policy.minimumIndependentHours * 3600000 && !isShortRetry;
   let repetitions = previous?.repetitions ?? 0,
     interval = previous?.interval_days ?? 0,
     ease = previous?.ease ?? 2.5,
@@ -21,7 +39,7 @@ export function schedule(
     repetitions = 0;
     interval = 0;
     lapses++;
-    ease = Math.max(1.3, ease - 0.2);
+    ease = Math.max(policy.minimumEase, ease - 0.2);
   } else if (isShortRetry || !independent) {
     interval = Math.max(1, interval);
   } else if (confidence === "guessed" || confidence === "unsure") {
@@ -30,21 +48,21 @@ export function schedule(
   } else {
     repetitions++;
     interval =
-      repetitions === 1
-        ? 1
-        : repetitions === 2
-          ? 3
-          : repetitions === 3
-            ? 7
-            : repetitions === 4
-              ? 14
-              : Math.round(Math.max(14, interval) * ease);
+      repetitions <= 4
+        ? policy.intervals[repetitions - 1]
+        : Math.round(Math.max(policy.intervals[3], interval) * ease);
     if (previous) retained++;
-    ease = Math.min(3, ease + (confidence === "knew" ? 0.05 : 0));
+    ease = Math.min(
+      policy.maximumEase,
+      ease + (confidence === "knew" ? 0.05 : 0),
+    );
   }
   return {
     due_at: new Date(
-      now.getTime() + (correct ? Math.max(1, interval) * DAY : 15 * 60_000),
+      now.getTime() +
+        (correct
+          ? Math.max(1, interval) * DAY
+          : policy.failureMinutes * 60_000),
     ).toISOString(),
     interval_days: interval,
     ease,

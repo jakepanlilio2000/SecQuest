@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./intelligence.css";
+import "./shadcn.css";
+import "./refinements.css";
 export const metadata: Metadata = {
   icons: { icon: "/favicon.svg" },
   title: "SecQuest — Build your security instinct",

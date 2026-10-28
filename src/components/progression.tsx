@@ -21,6 +21,7 @@ import {
   fmt,
 } from "./shared";
 import { Metric } from "./dashboard";
+import { ProgressionCenter } from "./completion";
 export function Analytics({
   data,
   start,
@@ -70,6 +71,92 @@ export function Analytics({
         />
       </div>
       <div className="analytics-grid">
+        <section className="panel full-span">
+          <div className="section-heading">
+            <h2>Four weeks of observed learning</h2>
+            <Badge>UTC dates</Badge>
+          </div>
+          <p>
+            First encounters and delayed reviews remain separate. Empty weeks
+            contain no inferred scores.
+          </p>
+          <div className="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Week starting</th>
+                  <th>Answers</th>
+                  <th>First encounters</th>
+                  <th>First accuracy</th>
+                  <th>Delayed reviews</th>
+                  <th>Delayed accuracy</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.insights.weeks.map((w) => (
+                  <tr key={w.start}>
+                    <td>{w.start.slice(0, 10)}</td>
+                    <td>{w.attempts}</td>
+                    <td>{w.firsts}</td>
+                    <td>{fmt(w.firstAccuracy)}</td>
+                    <td>{w.delayed}</td>
+                    <td>{fmt(w.delayedAccuracy)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="fine-print">
+            {data.firstAccuracyInterval
+              ? `Observed first-answer accuracy: 95% Wilson interval ${data.firstAccuracyInterval.lower}–${data.firstAccuracyInterval.upper}% over ${data.firstAccuracyInterval.samples} answers.`
+              : "No first-answer sample exists yet."}{" "}
+            Questions are not a random exam sample; this interval is descriptive
+            and does not predict a pass.
+          </p>
+        </section>
+        <section className="panel full-span">
+          <h2>Response time by objective</h2>
+          <p>
+            Median server-measured elapsed time for first encounters. It can
+            include idle time and is not a measure of focused study.
+          </p>
+          {data.insights.objectives.length ? (
+            <div className="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Objective</th>
+                    <th>Timed samples</th>
+                    <th>Median elapsed</th>
+                    <th>Observed accuracy interval</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.insights.objectives.map((o) => (
+                    <tr key={o.objective}>
+                      <td>{o.objective}</td>
+                      <td>{o.samples}</td>
+                      <td>
+                        {o.samples >= 3
+                          ? `${o.medianSeconds}s`
+                          : "Insufficient timed evidence"}
+                      </td>
+                      <td>
+                        {o.interval
+                          ? `${o.interval.lower}–${o.interval.upper}% (n=${o.interval.samples})`
+                          : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <Empty title="No timed evidence yet">
+              Answer questions to establish a baseline.
+            </Empty>
+          )}
+        </section>
         <section className="panel">
           <div className="section-heading">
             <h2>Readiness, with context</h2>
@@ -292,7 +379,13 @@ export function SkillTree({
   );
 }
 
-export function Achievements({ data }: { data: Overview }) {
+export function Achievements({
+  data,
+  onRefresh,
+}: {
+  data: Overview;
+  onRefresh?: () => Promise<void>;
+}) {
   return (
     <>
       <PageTitle
@@ -315,13 +408,16 @@ export function Achievements({ data }: { data: Overview }) {
         </div>
       </div>
       <div className="achievement-grid">
+        <div className="full-span">
+          <ProgressionCenter onRefresh={onRefresh} />
+        </div>
         {data.achievements.map((a, i) => (
           <article
             className={`panel achievement ${a.earnedAt ? "earned" : ""}`}
             key={a.id}
           >
             <div className="achievement-emblem">
-              <Icon icon={[ShieldCheck, Zap, Target, Flag][i]} size={43} />
+              <Icon icon={[ShieldCheck, Zap, Target, Flag][i % 4]} size={30} />
             </div>
             <Badge tone={a.earnedAt ? "green" : "muted"}>
               {a.earnedAt ? "EARNED" : "IN PROGRESS"}

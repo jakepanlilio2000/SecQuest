@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { useModalFocus } from "./use-modal-focus";
+import { studySound } from "./study-sound";
 import {
   LearningIntelligence,
   useIntelligenceActions,
@@ -642,11 +643,17 @@ export function LearningSession({
                 disabled={!completeSelection || busy}
                 onClick={() =>
                   act(async () => {
-                    await api(`sessions/${id}/answer`, "POST", {
-                      itemId: item.id,
-                      selected,
-                      confidence,
-                    });
+                    const result = await api<{ correct?: boolean }>(
+                      `sessions/${id}/answer`,
+                      "POST",
+                      {
+                        itemId: item.id,
+                        selected,
+                        confidence,
+                      },
+                    );
+                    if (typeof result.correct === "boolean")
+                      studySound(result.correct);
                     await load();
                     await onRefresh();
                   })

@@ -69,9 +69,9 @@ export function Dashboard({
             <Sparkles size={13} /> YOUR NEXT MOVE
           </Badge>
           <h2>
-            Knowledge is your
-            <br />
-            <span>strongest defense.</span>
+            {data.due
+              ? "Pick up the next review."
+              : "Build a reliable foundation."}
           </h2>
           <p>
             {data.uniqueAttempted
@@ -88,21 +88,26 @@ export function Dashboard({
             </span>
           </div>
         </div>
-        <div className="hero-graphic" aria-hidden="true">
-          <div className="radar-grid" />
-          <div className="hero-shield">
-            <ShieldCheck size={93} strokeWidth={1} />
-          </div>
-          <span className="float-label fl-one">
-            <span className="status-dot" />
-            ADAPT · PRACTICE · RETAIN
-          </span>
-          <span className="float-label fl-two">
-            <LockKeyhole size={13} /> SECURITY MINDSET
-          </span>
-          <div className="corner-mark cm-one" />
-          <div className="corner-mark cm-two" />
-        </div>
+        <aside className="review-brief" aria-label="Study briefing">
+          <h3>YOUR STUDY BRIEFING</h3>
+          <dl>
+            <div>
+              <dt>Reviews due</dt>
+              <dd>{data.due}</dd>
+            </div>
+            <div>
+              <dt>Items relearning</dt>
+              <dd>{data.needsReview}</dd>
+            </div>
+            <div>
+              <dt>Saved sessions</dt>
+              <dd>{active.length}</dd>
+            </div>
+          </dl>
+          <button className="text-link" onClick={() => go("achievements")}>
+            Weekly missions & milestones <ArrowRight size={14} />
+          </button>
+        </aside>
       </div>
       <div className="stats-grid">
         <Metric

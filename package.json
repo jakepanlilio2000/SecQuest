@@ -7,25 +7,32 @@
     "build": "next build",
     "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit",
+    "lint": "node --require ./scripts/windows-compat.cjs node_modules/eslint/bin/eslint.js src content scripts tests next.config.ts playwright.config.ts",
+    "mcp:verify": "node scripts/verify-shadcn-mcp.mjs --discover",
     "test": "node --require ./scripts/windows-compat.cjs --import tsx --test tests/*.test.ts",
     "db:migrate": "node --require ./scripts/windows-compat.cjs --import tsx scripts/migrate.ts",
     "db:seed": "node --require ./scripts/windows-compat.cjs --import tsx scripts/seed.ts",
     "db:backup": "node scripts/backup-database.mjs",
     "db:verify": "node scripts/verify-preservation.mjs",
     "intelligence:backfill": "node --require ./scripts/windows-compat.cjs --import tsx scripts/intelligence-backfill.ts",
+    "progression:backfill": "node --require ./scripts/windows-compat.cjs --import tsx scripts/progression-backfill.ts",
     "content:validate": "node --require ./scripts/windows-compat.cjs --import tsx scripts/validate-content.ts",
     "admin:create": "node --require ./scripts/windows-compat.cjs --import tsx scripts/create-admin.ts",
     "test:e2e": "playwright test",
+    "test:e2e:api": "node --require ./scripts/windows-compat.cjs node_modules/@playwright/test/cli.js test --config playwright.api.config.ts",
     "format": "prettier --write src content scripts tests next.config.ts playwright.config.ts"
   },
   "engines": {
-    "node": ">=22.13"
+    "node": "^22.18.0 || >=24.11.0"
   },
   "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "cn": "^0.5.0",
     "lucide-react": "^1.62.0",
     "next": "^16.4.3",
     "nodemailer": "^10.2.1",
     "pg": "^8.23.1",
+    "radix-ui": "^1.8.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-markdown": "^10.1.0",
@@ -33,14 +40,24 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@babel/core": "^8.0.9",
+    "@babel/eslint-parser": "^8.0.7",
+    "@eslint/js": "^10.0.1",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@next/eslint-plugin-next": "^16.4.3",
     "@playwright/test": "^1.64.1",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.6.5",
     "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.23.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0",
     "pdfjs-dist": "^6.4.299",
     "prettier": "^3.9.10",
+    "shadcn": "^4.23.0",
+    "tailwindcss": "^4.3.3",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   }

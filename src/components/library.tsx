@@ -27,6 +27,7 @@ import {
   fuzzyMatch,
 } from "./shared";
 import { Metric } from "./dashboard";
+import { useIntelligenceActions } from "./intelligence-shared";
 export function QuestionBank({
   onStart,
 }: {
@@ -168,6 +169,7 @@ export function Knowledge({
   setSearch: (s: string) => void;
   start: (m: Mode, o?: Record<string, unknown>) => Promise<void>;
 }) {
+  const actions = useIntelligenceActions();
   const [terms, setTerms] = useState<Term[]>([]),
     [sources, setSources] = useState<Source[]>([]),
     [active, setActive] = useState<Term | null>(null),
@@ -239,6 +241,34 @@ export function Knowledge({
               <Badge tone="blue">OBJECTIVE {active.objective}</Badge>
               <h2>{active.term}</h2>
               <p className="lead">{active.definition}</p>
+              {active.conceptId && (
+                <div className="concept-library-links">
+                  <Button
+                    variant="ghost"
+                    onClick={() =>
+                      actions.go(
+                        "knowledge-map",
+                        "&concept=" + active.conceptId,
+                      )
+                    }
+                  >
+                    Explore concept relationships <ArrowRight size={14} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() =>
+                      actions
+                        .save({
+                          conceptId: active.conceptId!,
+                          kind: "reference",
+                        })
+                        .catch((e) => setError(e.message))
+                    }
+                  >
+                    Write a concept note <BookOpen size={14} />
+                  </Button>
+                </div>
+              )}
               <h3>How it applies</h3>
               <p>{active.explanation}</p>
               {active.examples.map((e, i) => (

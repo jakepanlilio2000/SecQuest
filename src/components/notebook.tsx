@@ -26,6 +26,8 @@ import {
 } from "./shared";
 import { SafeMarkdown } from "./safe-markdown";
 import { ReferenceLinks } from "./intelligence-shared";
+import { NotebookRevisionTools } from "./completion";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import type { NotebookEntry } from "@/lib/intelligence-types";
 interface NotebookList {
   entries: NotebookEntry[];
@@ -774,62 +776,96 @@ export function Notebook({
                   />
                 </label>
               </div>
-              <div className="editor-tabs">
-                {(["edit", "preview", "split"] as const).map((mode) => (
-                  <button
-                    className={view === mode ? "active" : ""}
-                    key={mode}
-                    onClick={() => setView(mode)}
-                  >
-                    {mode}
-                  </button>
-                ))}
-                <span>Safe Markdown · HTML and remote images disabled</span>
-              </div>
-              {view !== "preview" && !active.deleted_at && (
-                <div className="markdown-toolbar">
-                  {[
-                    ["H2", "## ", ""],
-                    ["Bold", "**", "**"],
-                    ["Italic", "*", "*"],
-                    ["Bullets", "\n- ", ""],
-                    ["Numbered", "\n1. ", ""],
-                    ["Checklist", "\n- [ ] ", ""],
-                    ["Code", "\n```\n", "\n```\n"],
-                    [
-                      "Table",
-                      "\n| Concept | Meaning |\n| --- | --- |\n| ",
-                      " | |\n",
-                    ],
-                    ["Quote", "\n> ", ""],
-                    ["Link", "[", "](https://example.com)"],
-                  ].map(([label, before, after]) => (
-                    <button key={label} onClick={() => insert(before, after)}>
-                      {label}
-                    </button>
-                  ))}
+              <NotebookRevisionTools
+                entry={active}
+                dirty={dirty || busy || conflict}
+                selectedText={() => {
+                  const control = textarea.current;
+                  return control &&
+                    control.selectionEnd > control.selectionStart
+                    ? control.value.slice(
+                        control.selectionStart,
+                        control.selectionEnd,
+                      )
+                    : draft.body;
+                }}
+                onMessage={setStatus}
+                onRestore={(entry) => {
+                  setActive(entry);
+                  setDraft(toDraft(entry));
+                  setTagsText(entry.tags.join(", "));
+                  draftBaseRevision.current = entry.revision;
+                  setDirty(false);
+                  setConflict(false);
+                  sessionStorage.removeItem(key(entry.id));
+                  setStatus(`Restored as revision ${entry.revision}.`);
+                  void loadList().catch((e) => setError(e.message));
+                }}
+              />
+              <Tabs
+                value={view}
+                onValueChange={(v) => setView(v as typeof view)}
+              >
+                <div className="editor-tabs">
+                  <TabsList>
+                    {(["edit", "preview", "split"] as const).map((mode) => (
+                      <TabsTrigger value={mode} key={mode}>
+                        {mode}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                  <span>Safe Markdown · HTML and remote images disabled</span>
                 </div>
-              )}
-              <div className={`note-writing ${view}`}>
-                {view !== "preview" && (
-                  <textarea
-                    ref={textarea}
-                    aria-label="Note Markdown content"
-                    spellCheck
-                    disabled={!!active.deleted_at}
-                    value={draft.body}
-                    onChange={(e) => update({ body: e.target.value })}
-                  />
-                )}{" "}
-                {view !== "edit" && (
-                  <div className="note-preview">
-                    <SafeMarkdown>
-                      {draft.body ||
-                        "*Your preview appears here as you write.*"}
-                    </SafeMarkdown>
+                <TabsContent value={view}>
+                  {view !== "preview" && !active.deleted_at && (
+                    <div className="markdown-toolbar">
+                      {[
+                        ["H2", "## ", ""],
+                        ["Bold", "**", "**"],
+                        ["Italic", "*", "*"],
+                        ["Bullets", "\n- ", ""],
+                        ["Numbered", "\n1. ", ""],
+                        ["Checklist", "\n- [ ] ", ""],
+                        ["Code", "\n```\n", "\n```\n"],
+                        [
+                          "Table",
+                          "\n| Concept | Meaning |\n| --- | --- |\n| ",
+                          " | |\n",
+                        ],
+                        ["Quote", "\n> ", ""],
+                        ["Link", "[", "](https://example.com)"],
+                      ].map(([label, before, after]) => (
+                        <button
+                          key={label}
+                          onClick={() => insert(before, after)}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className={`note-writing ${view}`}>
+                    {view !== "preview" && (
+                      <textarea
+                        ref={textarea}
+                        aria-label="Note Markdown content"
+                        spellCheck
+                        disabled={!!active.deleted_at}
+                        value={draft.body}
+                        onChange={(e) => update({ body: e.target.value })}
+                      />
+                    )}{" "}
+                    {view !== "edit" && (
+                      <div className="note-preview">
+                        <SafeMarkdown>
+                          {draft.body ||
+                            "*Your preview appears here as you write.*"}
+                        </SafeMarkdown>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </TabsContent>
+              </Tabs>
               <div className="note-links">
                 {!!draft.sourceRefs.length && (
                   <ReferenceLinks

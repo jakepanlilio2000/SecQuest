@@ -4,17 +4,17 @@
 
 Next.js App Router serves a React/TypeScript client and Node route handlers. Question grading and progression rules live in server modules, never in presentation code. The browser receives an explicit public question projection without correct answers or teaching explanations. Detailed feedback is returned only after an accepted learning answer or after mock completion.
 
-| Module | Responsibility |
-|---|---|
-| `src/lib/auth.ts` | Password KDF, opaque session creation, token hashing, user lookup, persistent throttles, user-row locking |
-| `src/lib/content.ts` | Objective registry, typed validation, content revision persistence, starter seeding, public projection |
-| `src/lib/engine.ts` | Session construction, selection, answer validation, grading, review writes, retry placement, expiry, reward events |
-| `src/lib/scheduler.ts` | Pure grading and documented SM-2-inspired delayed-review transitions |
-| `src/lib/analytics.ts` | Real attempt aggregates, coverage, evidence-adjusted objective estimates, readiness factors |
-| `src/lib/api.ts` | Zod request boundaries, CSRF/origin checks, RBAC, cards, plans, simulations, administration, export/deletion |
-| `src/lib/db.ts` | Typed parameterized SQL interface; SQLite dev and PostgreSQL deployment adapters; versioned SQL migrations |
-| `content/` | Versioned V8 hierarchy, original seed batch, references, fictional simulation definitions |
-| `src/components/` | Client interaction and presentation; no trusted grading or reward calculation |
+| Module                 | Responsibility                                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `src/lib/auth.ts`      | Password KDF, opaque session creation, token hashing, user lookup, persistent throttles, user-row locking          |
+| `src/lib/content.ts`   | Objective registry, typed validation, content revision persistence, starter seeding, public projection             |
+| `src/lib/engine.ts`    | Session construction, selection, answer validation, grading, review writes, retry placement, expiry, reward events |
+| `src/lib/scheduler.ts` | Pure grading and documented SM-2-inspired delayed-review transitions                                               |
+| `src/lib/analytics.ts` | Real attempt aggregates, coverage, evidence-adjusted objective estimates, readiness factors                        |
+| `src/lib/api.ts`       | Zod request boundaries, CSRF/origin checks, RBAC, cards, plans, simulations, administration, export/deletion       |
+| `src/lib/db.ts`        | Typed parameterized SQL interface; SQLite dev and PostgreSQL deployment adapters; versioned SQL migrations         |
+| `content/`             | Versioned V8 hierarchy, original seed batch, references, fictional simulation definitions                          |
+| `src/components/`      | Client interaction and presentation; no trusted grading or reward calculation                                      |
 
 ## Storage
 
@@ -53,3 +53,13 @@ New content uses revisioned imports and editorial gates. The blueprint JSON impo
 Migration 004 adds canonical concepts and revision-specific links without altering questions or progress. The answer transaction appends idempotent misconception evidence and any eligible forecast outcome; expensive joins/classification remain outside grading. Derived replay is bounded and versioned. `mastery.ts` shares the pre-existing formula with concept views. Graph prerequisite/builds-on edges are validated as a DAG; unrelated edges never become prerequisites. Global graph edits use an advisory lock on PostgreSQL and the existing serialized SQLite transaction path.
 
 Forecasting reads the existing `review_schedules` and real attempts. It does not implement another scheduler. Daily/recovery ordering is deterministic; recall probabilities are gated, explicitly heuristic and evaluated only against future independent retrievals. Notebook operations are separate owner-scoped transactions with revision checks, request idempotency, private history, provenance and recoverable deletion. Reading/writing notes never changes learning evidence. API routes reuse authentication, origin checks and rate limits. See [the implementation report](../INTELLIGENT_LEARNING_IMPLEMENTATION.md) for formulas, table groups, security boundaries and remaining limitations.
+
+## Completion integration
+
+Migration 005 adds `email_verifications`, `email_verification_tokens`, `notebook_flashcards`, `leaderboard_preferences` and `review_policies`. Existing tables and migration files remain unchanged. Account deletion uses foreign-key cascades; owner-scoped export includes new private records. Email bearer tokens are stored hashed, single-use/expiring, consumed under account locking; public confirmation still enforces origin/validation/rate limits.
+
+New session metadata snapshots the active immutable review-policy version. Sessions lacking it use v1; editing policy never reschedules stored dates. The first-correct/delayed reward paths remain idempotent; retention rewards additionally require correctness. Readiness counts successful delayed retrievals, while failed delayed statistics remain observable.
+
+Note restoration reads private history and saves a new revision using existing optimistic concurrency/idempotency. Note cards use owner/note/content deduplication and the flashcard queue without exam evidence. Weekly rewards use UTC windows, account locks and unique XP keys. Personal bests describe raw session accuracy including retries; they are separate from mastery. Leaderboard requires explicit alias opt-in and never reads notes.
+
+Observed analytics provide four weekly groups, first-answer Wilson intervals and minimum-sample elapsed-time medians. These do not calibrate the forecast. Six registry primitives use scoped Tailwind utilities and existing CSS variables; the Next shell/navigation remains in place.

@@ -1,0 +1,29 @@
+/* Scoped Tailwind utilities for registry components; existing CSS owns the app. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme) prefix(sq);
+@import "tailwindcss/utilities.css" layer(utilities) prefix(sq);
+@source "../components/ui";
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--text);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--text);
+  --color-primary: var(--blue);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--surface-alt);
+  --color-secondary-foreground: var(--text);
+  --color-muted: var(--surface-alt);
+  --color-muted-foreground: var(--muted);
+  --color-accent: var(--surface-alt);
+  --color-accent-foreground: var(--text);
+  --color-destructive: #c85162;
+  --color-border: var(--border);
+  --color-input: var(--border);
+  --color-ring: var(--blue);
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+}

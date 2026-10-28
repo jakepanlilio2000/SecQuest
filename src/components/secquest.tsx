@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 import {
   Activity,
@@ -40,6 +41,14 @@ import { Admin } from "./administration";
 import { MisconceptionDashboard } from "./misconceptions";
 import { KnowledgeMap } from "./knowledge-map";
 import { RetentionForecast } from "./retention";
+import { VerifyEmail } from "./completion";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "./ui/sheet";
 import { Notebook } from "./notebook";
 const nav: { section: string; items: [string, string, LucideIcon][] }[] = [
   {
@@ -143,6 +152,10 @@ export default function SecQuest() {
     document.documentElement.dataset.motion = user?.settings.reducedMotion
       ? "reduced"
       : "full";
+    document.documentElement.dataset.accent = user?.settings.accent ?? "blue";
+    document.documentElement.dataset.sound = user?.settings.sounds
+      ? "on"
+      : "off";
   }, [user]);
   async function run(fn: () => Promise<void>) {
     setBusy(true);
@@ -180,6 +193,13 @@ export default function SecQuest() {
         <span>Opening your command center…</span>
       </main>
     );
+  if (params.get("verify"))
+    return (
+      <VerifyEmail
+        token={params.get("verify")!}
+        onClose={() => router.replace(user ? "/?view=settings" : "/")}
+      />
+    );
   if (!user)
     return (
       <>
@@ -208,83 +228,99 @@ export default function SecQuest() {
         }}
       />
     );
+  const sidebarContent = (
+    <>
+      <Link
+        className="brand"
+        href="/?view=dashboard"
+        onClick={(e) => {
+          e.preventDefault();
+          go("dashboard");
+        }}
+      >
+        <span className="brand-icon">
+          <ShieldCheck size={25} />
+        </span>
+        <span>
+          sec<span className="brand-accent">quest</span>
+          <small>BUILD YOUR SECURITY INSTINCT</small>
+        </span>
+      </Link>
+      <div className="certification">
+        <span className="cert-icon">
+          <Shield size={19} />
+        </span>
+        <span>
+          <strong>CompTIA Security+</strong>
+          <small>SY0-801 · V8 objectives</small>
+        </span>
+        <Badge tone="blue">V8</Badge>
+      </div>
+      <nav aria-label="Main navigation">
+        {nav.map((group) => (
+          <div className="nav-group" key={group.section}>
+            <p>{group.section}</p>
+            {group.items.map(([id, label, I]) => (
+              <button
+                key={id}
+                className={`nav-link ${view === id || (id === "learn" && view === "session") ? "active" : ""}`}
+                aria-current={view === id ? "page" : undefined}
+                onClick={() => go(id)}
+              >
+                <Icon icon={I} size={18} />
+                <span>{label}</span>
+                {id === "recovery" && !!data?.due && <b>{data.due}</b>}
+                {view === id && <span className="nav-dot" />}
+              </button>
+            ))}
+          </div>
+        ))}
+      </nav>
+      <div className="sidebar-bottom">
+        <div className="rank-mini">
+          <span>
+            <Icon icon={ShieldCheck} />
+          </span>
+          <div>
+            <strong>{data?.rank ?? "Security Recruit"}</strong>
+            <small>{data?.xp ?? 0} XP earned</small>
+          </div>
+        </div>
+        <button className="profile-mini" onClick={() => go("settings")}>
+          <span className="avatar">{user.name.slice(0, 2).toUpperCase()}</span>
+          <span>
+            <strong>{user.name}</strong>
+            <small>Personal workspace</small>
+          </span>
+          <Icon icon={Settings2} size={17} />
+        </button>
+      </div>
+    </>
+  );
   return (
     <div className="app-shell">
-      <aside className={`sidebar ${mobile ? "visible" : ""}`}>
-        <a
-          className="brand"
-          href="/?view=dashboard"
-          onClick={(e) => {
-            e.preventDefault();
-            go("dashboard");
+      <a className="skip-link" href="#main-content">
+        Skip to learning content
+      </a>
+      <aside className="sidebar">{sidebarContent}</aside>
+      <Sheet open={mobile} onOpenChange={setMobile}>
+        <SheetContent
+          side="left"
+          className="mobile-nav-sheet"
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            document.querySelector<HTMLButtonElement>(".mobile-menu")?.focus();
           }}
         >
-          <span className="brand-icon">
-            <ShieldCheck size={25} />
-          </span>
-          <span>
-            sec<span className="brand-accent">quest</span>
-            <small>BUILD YOUR SECURITY INSTINCT</small>
-          </span>
-        </a>
-        <div className="certification">
-          <span className="cert-icon">
-            <Shield size={19} />
-          </span>
-          <span>
-            <strong>CompTIA Security+</strong>
-            <small>SY0-801 · V8 objectives</small>
-          </span>
-          <Badge tone="blue">V8</Badge>
-        </div>
-        <nav aria-label="Main navigation">
-          {nav.map((group) => (
-            <div className="nav-group" key={group.section}>
-              <p>{group.section}</p>
-              {group.items.map(([id, label, I]) => (
-                <button
-                  key={id}
-                  className={`nav-link ${view === id || (id === "learn" && view === "session") ? "active" : ""}`}
-                  onClick={() => go(id)}
-                >
-                  <Icon icon={I} size={18} />
-                  <span>{label}</span>
-                  {id === "recovery" && !!data?.due && <b>{data.due}</b>}
-                  {view === id && <span className="nav-dot" />}
-                </button>
-              ))}
-            </div>
-          ))}
-        </nav>
-        <div className="sidebar-bottom">
-          <div className="rank-mini">
-            <span>
-              <Icon icon={ShieldCheck} />
-            </span>
-            <div>
-              <strong>{data?.rank ?? "Security Recruit"}</strong>
-              <small>{data?.xp ?? 0} XP earned</small>
-            </div>
-          </div>
-          <button className="profile-mini" onClick={() => go("settings")}>
-            <span className="avatar">
-              {user.name.slice(0, 2).toUpperCase()}
-            </span>
-            <span>
-              <strong>{user.name}</strong>
-              <small>Personal workspace</small>
-            </span>
-            <Icon icon={Settings2} size={17} />
-          </button>
-        </div>
-      </aside>
-      {mobile && (
-        <button
-          className="sidebar-backdrop"
-          aria-label="Close navigation"
-          onClick={() => setMobile(false)}
-        />
-      )}
+          <SheetHeader className="sr-only">
+            <SheetTitle>Learning workspace navigation</SheetTitle>
+            <SheetDescription>
+              Choose a study area. Escape closes navigation.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mobile-sidebar-body">{sidebarContent}</div>
+        </SheetContent>
+      </Sheet>
       <div className="main-shell">
         <header className="topbar">
           <div className="breadcrumb">
@@ -389,9 +425,12 @@ export default function SecQuest() {
             <Analytics data={data} start={start} />
           )}
           {view === "skills" && data && <SkillTree data={data} start={start} />}
-          {view === "achievements" && data && <Achievements data={data} />}
+          {view === "achievements" && data && (
+            <Achievements data={data} onRefresh={refresh} />
+          )}
           {view === "settings" && (
             <Settings
+              appearance={data?.appearance}
               user={user}
               setUser={setUser}
               logout={logout}

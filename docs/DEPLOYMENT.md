@@ -51,3 +51,15 @@ Back up before starting the new release, because the existing initialization pat
 For PostgreSQL, use operator-managed `pg_dump`/restore verification; the SQLite utilities intentionally refuse a PostgreSQL URL. Apply migrations/seed once before scaling replicas. Execute the expanded integration tests against a disposable PostgreSQL instance before release; this host verified SQLite only.
 
 Preferred code rollback keeps all additive tables and migration records, then redeploys the operator's previously retained release artifact. For a database restore, snapshot the current state first, restore the old backup into a new isolated destination, verify sign-in/progress/schedules, and cut over only with writers stopped. Never blindly replace an active WAL file or discard newer notebook entries. Full backup and rollback details are in [the upgrade report](../INTELLIGENT_LEARNING_IMPLEMENTATION.md).
+
+## Completion release operations
+
+Development/build tooling now requires Node **^22.18.0 or >=24.11.0**, tested 26.12. Scoped Tailwind/PostCSS and official primitives require normal build dependencies. Use the existing standalone container entry point for deployment; `next start` produces a standalone-output warning during local QA even though local HTTP checks pass.
+
+Back up before first start of this release; migration 005 is additive and initialization can apply it automatically. Seed once, verify immediately before live traffic, then run `npm run progression:backfill` to derive eligible badges without XP rewriting. Existing sessions retain policy v1 and due dates; new sessions snapshot the active policy. CLI processes require the intended database environment explicitly exported.
+
+Strict preservation may detect normal throttle/cache changes if requests remain active. Retain the raw result and inspect differences rather than reverting live security counters. The companion completion audit explicitly separates these from original learning/content/account rows; it does not excuse arbitrary changes.
+
+Configure SMTP_URL/MAIL_FROM and APP_ORIGIN, then verify real mail and expiration/replay behavior before declaring verification/recovery operational. Mandatory email gating is not enabled for existing accounts. Verify PostgreSQL migrations, transactions/advisory locking and complete workflows against a disposable target-version database; this host tested SQLite only.
+
+Codex MCP is development tooling: backup location and exact configuration are in the final audit. Restart Codex to load newly registered tools. Do not package personal Codex config, local learner DBs, backups or QA evidence into a public static host. Rollback keeps additive tables; any data restore requires a fresh current-state backup and stopped writers so newer notes/progress are not discarded.

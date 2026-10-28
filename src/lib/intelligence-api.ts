@@ -19,6 +19,8 @@ import {
   saveContextNote,
   trashEntry,
   exportNotebook,
+  restoreNoteRevision,
+  noteToFlashcard,
 } from "./notebook";
 import { startSession } from "./engine";
 import { lockUser } from "./auth";
@@ -251,10 +253,39 @@ export async function intelligenceRoutes(
   if (path === "notebook/entries" && method === "POST")
     return json({ entry: await saveEntry(user.id, await readBody(req)) });
   const entry = path.match(
-    /^notebook\/entries\/([a-f0-9-]+)(?:\/(restore|history))?$/,
+    /^notebook\/entries\/([a-f0-9-]+)(?:\/(restore|history|restore-revision|flashcard))?$/,
   );
   if (entry) {
     const noteId = z.string().uuid().parse(entry[1]);
+    if (method === "POST" && entry[2] === "restore-revision") {
+      const input = z
+        .object({
+          revision: z.number().int().positive(),
+          expectedRevision: z.number().int().positive(),
+          mutationId: z.string().uuid(),
+        })
+        .parse(await readBody(req));
+      return json({
+        entry: await restoreNoteRevision(
+          user.id,
+          noteId,
+          input.revision,
+          input.expectedRevision,
+          input.mutationId,
+        ),
+      });
+    }
+    if (method === "POST" && entry[2] === "flashcard") {
+      const input = z
+        .object({
+          front: z.string().trim().min(2).max(500),
+          back: z.string().trim().min(2).max(3000),
+        })
+        .parse(await readBody(req));
+      return json({
+        card: await noteToFlashcard(user.id, noteId, input.front, input.back),
+      });
+    }
     if (method === "GET") {
       const note = await readEntry(user.id, noteId);
       if (entry[2] === "history")

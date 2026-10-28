@@ -92,8 +92,8 @@ async function validateLinks(tx: Database, user: string, input: NoteInput) {
     input.questionId &&
     !(await first(
       tx,
-      "SELECT r.revision FROM question_revisions r JOIN questions q ON q.id=r.question_id WHERE r.question_id=? AND r.revision=? AND (q.status='published' OR EXISTS (SELECT 1 FROM attempts a WHERE a.user_id=? AND a.question_id=r.question_id AND a.revision=r.revision))",
-      [input.questionId, input.questionRevision, user],
+      "SELECT r.revision FROM question_revisions r JOIN questions q ON q.id=r.question_id WHERE r.question_id=? AND r.revision=? AND (q.status='published' OR EXISTS (SELECT 1 FROM attempts a WHERE a.user_id=? AND a.question_id=r.question_id AND a.revision=r.revision) OR EXISTS (SELECT 1 FROM session_items i JOIN quiz_sessions s ON s.id=i.session_id WHERE s.user_id=? AND i.question_id=r.question_id AND i.revision=r.revision))",
+      [input.questionId, input.questionRevision, user, user],
     ))
   )
     throw new AppError("Question reference is unavailable.");
@@ -407,10 +407,10 @@ export async function saveContextNote(
   },
   database = db(),
 ) {
-  let origin = "",
-    title = "",
-    body = "",
-    objective: string | null = null,
+  let origin: string,
+    title: string,
+    body: string,
+    objective: string | null,
     conceptId = input.conceptId ?? null,
     questionId = input.questionId ?? null,
     revision = input.revision ?? null,
@@ -550,4 +550,85 @@ export async function exportNotebook(user: string, database = db()) {
     )
     .join("\n\n\n");
   return { data, markdown };
+}
+
+export async function restoreNoteRevision(
+  user: string,
+  id: string,
+  revision: number,
+  expectedRevision: number,
+  mutationId: string,
+  database = db(),
+) {
+  const current = await readEntry(user, id, database);
+  if (current.deleted_at)
+    throw new AppError("Restore the note from Trash first.", 409);
+  const row = await first<{ data: string }>(
+    database,
+    "SELECT data FROM notebook_entry_history WHERE entry_id=? AND revision=?",
+    [id, revision],
+  );
+  if (!row) throw new AppError("Saved revision not found.", 404);
+  const old = JSON.parse(row.data) as NotebookEntry;
+  return saveEntry(
+    user,
+    {
+      id,
+      mutationId,
+      expectedRevision,
+      title: old.title,
+      body: old.body,
+      notebookId: old.notebook_id,
+      category: old.category,
+      objective: old.objective,
+      conceptId: old.concept_id,
+      questionId: old.question_id,
+      questionRevision: old.question_revision,
+      sourceRefs: JSON.parse(old.source_refs),
+      tags: old.tags ?? [],
+      pinned: !!old.pinned,
+    },
+    database,
+  );
+}
+export async function noteToFlashcard(
+  user: string,
+  id: string,
+  front: string,
+  back: string,
+  database = db(),
+) {
+  return database.transaction(async (tx) => {
+    await lockUser(tx, user);
+    const note = await readEntry(user, id, tx);
+    if (note.deleted_at)
+      throw new AppError("Restore the note from Trash first.", 409);
+    const hash = createHash("sha256")
+      .update(JSON.stringify({ front, back }))
+      .digest("hex");
+    const existing = await first<{ card_id: string }>(
+      tx,
+      "SELECT card_id FROM notebook_flashcards WHERE user_id=? AND entry_id=? AND content_hash=?",
+      [user, id, hash],
+    );
+    if (existing) return { id: existing.card_id, existing: true };
+    const card = randomUUID();
+    await tx.run(
+      "INSERT INTO flashcards(id,user_id,question_id,front,back,objective,due_at) VALUES (?,?,?,?,?,?,?)",
+      [
+        card,
+        user,
+        null,
+        front,
+        back,
+        note.objective ?? "",
+        new Date().toISOString(),
+      ],
+    );
+    await tx.run(
+      "INSERT INTO notebook_flashcards(user_id,entry_id,content_hash,card_id,created_at) VALUES (?,?,?,?,?)",
+      [user, id, hash, card, new Date().toISOString()],
+    );
+    return { id: card, existing: false };
+  });
 }

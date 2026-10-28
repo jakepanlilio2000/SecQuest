@@ -43,3 +43,11 @@ The target remains 600 reviewed items, then 1,200 according to domain weights. R
 6. Editing creates an immutable new revision and returns the current version to Draft. Existing sessions and attempts retain the old revision. Archiving prevents new session selection without deleting history.
 
 Exact normalized-prompt duplicate detection is implemented. Semantic paraphrase detection and automated logical correctness verification are not. Structural validation cannot establish educational truth; the independent review gate is essential.
+
+## Completion content update
+
+Question bank remains **44 distinct original questions/45 immutable revisions**, with no independent SME sign-off added. Five original fictional simulations are now bundled: the original two plus certificate validation, cloud permissions and AI trust-boundary exercises. They have explicit choices/rationales, server-side grading, active-answer redaction and idempotent rewards; no live target interaction.
+
+The library also exposes 58 source-informed editorial foundation lessons using shared concept IDs and graph links. This is not a full encyclopedia/acronym list or a claim of independent expert acceptance. Misconception mapping remains nine definitions/thirteen mappings over nine questions, only four with two distinct mapped questions.
+
+Administrative near-duplicate assistance compares lexical token overlap within the same objective. It is a review aid, not full semantic detection or proof of correctness; it never auto-rejects or deletes items. Complete coverage, ambiguity review, empirical difficulty and 600/1,200 reviewed targets still require qualified authors/reviewers and real pilot evidence.

@@ -2,11 +2,11 @@
 
 A working, independent Security+ learning workspace aligned to the publicly available **SY0-801 V8 objectives, document v2.0**, checked on **October 27, 2026**.
 
-This release is an operational foundation, not completion of the entire master brief. It contains **44 original starter questions across all 27 objectives**, six question formats, persistent adaptive review, timed mock practice, and two defensive simulations. The 600-question target and independent subject-matter approval are **not complete**. See [implementation status](docs/STATUS.md) and [content provenance](docs/CONTENT.md).
+This release is an operational foundation, not completion of the entire master brief. It contains **44 original starter questions across all 27 objectives**, six question formats, persistent adaptive review, timed mock practice, and five defensive simulations. The 600-question target and independent subject-matter approval are **not complete**. See [implementation status](docs/STATUS.md) and [content provenance](docs/CONTENT.md).
 
 ## Run locally on Windows
 
-Requires Node.js 22.13+ (tested with the supplied Node 26.12 runtime). No WAMP, PHP, database service, AI key, or Docker installation is needed for the SQLite development path.
+Requires Node.js ^22.18.0 or >=24.11.0 (tested with the supplied Node 26.12 runtime). No WAMP, PHP, database service, AI key, or Docker installation is needed for the SQLite development path.
 
 ```powershell
 npm ci --cache .npm-cache
@@ -31,14 +31,14 @@ The Windows compatibility preload only handles restricted hosts where `os.userIn
 - Single/scenario, multiple response, matching, ordering, and fictional log analysis. Each starter question has a definition, option-specific rationales, and at least two examples.
 - Wrong answers enter a durable review schedule automatically and return after 3–8 intervening items when enough eligible session items remain. Otherwise they are deferred. Recent retries do not count as new mastery evidence.
 - Mock drafts autosave. Correctness and explanations are absent from active exam payloads. Server time enforces expiry; the report appears after final submission or expiry.
-- First-encounter/retry/delayed-recall analytics, objective coverage, XP with unique reward events, ranks, and four actual achievements.
-- Searchable concept library, typo-tolerant lookup, deterministic concept companion, personal spaced flashcards, editable study-day plans, skill tree, two graded simulations.
+- First-encounter/retry/delayed-recall analytics, objective coverage, XP with unique reward events, ranks, and eight evidence-based achievements.
+- Searchable concept library, typo-tolerant lookup, deterministic concept companion, personal spaced flashcards, editable study-day plans, skill tree, five graded simulations.
 - Restricted content dashboard with a JSON question editor, immutable revisions, separate-author review approval, publication states, atomic JSON/CSV import, export, coverage matrix, source register, audit history, and versioned exam configuration.
 - Knowledge gaps and misconception evidence, a directed concept map with prerequisite paths, schedule-based retention forecasts, and a private Markdown notebook with autosave, conflict recovery, contextual saves, search, folders/tags and export. Start from the new sidebar sections; administrators manage mappings under Account settings → Content administration.
 
 The [intelligent learning implementation report](INTELLIGENT_LEARNING_IMPLEMENTATION.md) records architecture, mapping coverage, model limitations, migration verification and rollback instructions. Forecasts are uncalibrated heuristics and remain nonnumeric without sufficient delayed-review evidence. The original grading and review scheduler remain in place.
 
-For an existing database, back it up before first starting this release: `npm run db:backup -- data/backups/before-upgrade.sqlite` (backup tool requires Node 22.16+). Migration 004 is additive. Run `npm run db:verify -- data/backups/before-upgrade.sqlite.manifest.json` immediately after seeding to compare original rows, then `npm run intelligence:backfill` for historical evidence. No learner records are reset.
+For an existing database, back it up before first starting this release: `npm run db:backup -- data/backups/before-upgrade.sqlite` (backup tool requires Node 22.16+). Migrations 004 and 005 are additive. Run `npm run db:verify -- data/backups/before-upgrade.sqlite.manifest.json` immediately after seeding to compare original rows, then `npm run intelligence:backfill` for historical evidence and `npm run progression:backfill` for eligible badges. No learner records are reset.
 
 ## Verify
 
@@ -88,3 +88,19 @@ docker compose -f compose.yaml -f compose.dev.yaml up --build
 This application runs as a Node service; placing it under WAMP's document root does not make it a PHP application. Use the local Node port or configure Apache as a reverse proxy. For public deployment, use HTTPS, set the canonical `APP_ORIGIN`, set `COOKIE_SECURE=true`, and provide backups and monitoring.
 
 CompTIA and Security+ are their respective owners' marks. SecQuest is unofficial, offers original educational material, and does not supply actual examination questions or predict an official passing score.
+
+## Completion release · October 28, 2026
+
+Official shadcn MCP is configured and actual registry calls verified. **Restart Codex for native shadcn tools in a new session.** Six scoped shadcn primitives refine the current interface. New features include private note revision restoration and recall cards, weekly missions/personal bests, optional sharing/sounds and unlocked accents, four-week/elapsed-time insights, verification-token workflow, versioned review policies and duplicate-review assistance. SMTP delivery remains unavailable without configuration.
+
+Current checks: **70 tests**, **2 real HTTP E2E tests**, lint, TypeScript, content validation and optimized build pass. Production dependency audit has zero vulnerabilities; three low development-tool findings await an upstream fix. See [final implementation audit](FINAL_IMPLEMENTATION_AUDIT.md) and [feature statuses](IMPLEMENTATION_GAP_ANALYSIS.md).
+
+```powershell
+npm run lint
+npm run mcp:verify
+npm run progression:backfill
+# Against an already-running isolated local QA server at port 3001:
+npm run test:e2e:api
+```
+
+The HTTP suite uses synthetic accounts and writes to the target server's database: run it only against an isolated QA instance. Standalone GUI Playwright execution remains unverified here; connected-browser checks cover three viewports. Development tooling requires Node ^22.18.0 or >=24.11.0, tested 26.12. The old minimum is superseded.

@@ -1,5 +1,6 @@
 "use client";
 import { type ReactNode } from "react";
+import { Button as RegistryButton } from "./ui/button";
 
 import {
   Activity,
@@ -36,6 +37,8 @@ export interface Profile {
     targetDate?: string;
     reducedMotion?: boolean;
     avatar?: string;
+    accent?: "blue" | "forest" | "amber" | "violet";
+    sounds?: boolean;
   };
 }
 
@@ -64,6 +67,7 @@ export interface SessionView {
 }
 
 export interface Term {
+  conceptId?: string | null;
   term: string;
   definition: string;
   explanation: string;
@@ -144,9 +148,19 @@ export function Button({
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: string }) {
   return (
-    <button className={`button ${variant} ${className}`} {...props}>
+    <RegistryButton
+      variant={
+        variant === "danger"
+          ? "destructive"
+          : variant === "ghost"
+            ? "outline"
+            : "default"
+      }
+      className={`button ${variant} ${className}`}
+      {...props}
+    >
       {children}
-    </button>
+    </RegistryButton>
   );
 }
 
