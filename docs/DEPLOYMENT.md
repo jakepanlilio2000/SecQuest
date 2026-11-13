@@ -1,5 +1,37 @@
 # Deployment and recovery
 
+## Current delivery policy: CI only
+
+The owner selected CI only; production deployment is deferred. `.github/workflows/ci.yml` validates pull requests, branch pushes and merge-queue candidates. It does not publish an image, deploy a site, contact a production database or upload test artifacts. No production host, URL or credentials are configured. GitHub Pages cannot run the existing Node API/auth/SQL application; no static export or guest demo is included.
+
+The `Validation` job uses GitHub-hosted Ubuntu with Node 24 (also the Docker image's runtime major), SHA-pinned checkout/setup actions, read-only contents permission, no persisted checkout credentials and cancellation of superseded runs. Only npm's download cache is cached, keyed by the lockfile through setup-node; node_modules, Next output, databases, environment files and credentials are not cached. `npm ci` enforces the lockfile. No workflow step receives repository secrets. Keep PR jobs on disposable GitHub-hosted runners and use `pull_request`, never privileged `pull_request_target` execution of PR code.
+
+Required job steps: lockfile install, lint, typecheck, unit/integration tests, content validation, production build, isolated HTTP workflows and Chromium desktop/mobile workflows. Test database URL selectors are explicitly blank; the fallback path is in runner temporary storage and test fixtures allocate their own temporary SQLite files. E2E configs start their own disposable instances and do not reuse a listening app. PostgreSQL, Docker, SMTP, TLS and production acceptance remain separate release prerequisites; a green SQLite workflow does not establish those results.
+
+### Repository setup and PR verification
+
+1. Apply this change on a feature branch in the actual Git checkout and open a PR. This supplied directory has no `.git`/remote metadata, so branch protections, the default branch and remote workflow execution could not be inspected here. No repository settings have been changed.
+2. Enable Actions under the repository's existing security policy. An administrator should configure the protected default branch/ruleset to require PR review and the `Validation` status from this workflow, with changes up to date (or a merge queue). Confirm the status name in the first actual run before making it required. Do not allow direct/force pushes or deletion. Require appropriate review for workflow changes. These are setup instructions, not settings this change enforces.
+3. Inspect the PR diff for unexpected workflow permissions, secret references, dependency changes and data files. Check that both pinned action SHAs belong to their official repositories before updating them.
+4. Verify the PR check at the repository's **Pull requests → PR → Checks → Validation** and its **Actions → SecQuest CI** run. There is no public preview URL. Inspect failed logs before retrying; never disable a required check to obtain a passing result. Fork PRs may require maintainer approval to run.
+5. Merge through the protected-default-branch PR process only when the reviewed revision's required checks pass. The resulting push validates the merged revision again. Merging performs no production release under the current policy.
+
+Official references: [GitHub secure workflow use](https://docs.github.com/en/actions/reference/security/secure-use), [workflow concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency), [Playwright CI setup](https://playwright.dev/docs/ci-intro).
+
+### Future server release gate and verification
+
+Production release requires a separate reviewed host-specific change after the owner selects a server-capable host. That workflow must accept only the protected default branch's checked revision, require successful validation, serialize production releases and use a protected production environment with approval. PR jobs must never publish or receive production credentials. Do not add deployment tokens to source or pass runtime secrets as image build arguments.
+
+Use the standalone Node service and durable PostgreSQL described below. Configure runtime `DATABASE_URL` (or Compose-managed `POSTGRES_PASSWORD`), the exact HTTPS `APP_ORIGIN`, `COOKIE_SECURE=true`, and authorized `SMTP_URL`/`MAIL_FROM` when email is enabled, through the selected host's secret mechanism. Restrict database/network access and configure database transport security as required by that host. Keep the application behind the HTTPS proxy; the current Compose application port binds to loopback.
+
+Before first application request, back up and verify restoration to an isolated database, retain the previous release artifact, and run tracked migrations/seed once with the intended database environment. Use an operator environment containing the TypeScript sources and locked dependencies; the slim runtime image omits those scripts. The first API request, including `/api/health`, currently performs initialization, so keep traffic stopped until the backup and migration checks finish. Do not change database engines or overwrite a volume during rollout.
+
+After deploying the checked revision, verify `<APP_ORIGIN>/api/health` returns HTTP 200, `ok: true` and `database: postgresql`, then verify the landing page at `<APP_ORIGIN>/`. These are templates; no production URL exists yet. In an isolated staging instance with synthetic accounts, verify sign-in/logout, refresh/resume, attempts/schedules, notebook persistence, cross-account isolation, mock redaction and account export/deletion. Verify secure cookies, origin rejection and SMTP expiration/replay behavior. Production smoke checks must not delete or rewrite real learner records. Configure encrypted backups, restore drills, storage/error monitoring and operator alerts before public traffic.
+
+All accounts, question revisions, attempts, schedules, notes and settings persist in SQL. PostgreSQL requires its retained volume or managed database; container replacement alone must not replace that storage. Local SQLite requires durable disk. Browser drafts are recovery aids; no cross-device sync, browser database, export import/restore facility or infrastructure backup is added here. CI databases and runner files are disposable.
+
+Rollback: revert a faulty CI change through another reviewed PR. For a future server release, redeploy the retained previous artifact while retaining additive tables and migration records. If data restoration is unavoidable, snapshot current state first, stop writers, restore into a separate destination, verify preservation and account for newer records before cutover. Never roll back by deleting the PostgreSQL volume or replacing an active SQLite/WAL file. The backup procedures below remain required.
+
 ## Local production build
 
 ```powershell
@@ -39,6 +71,8 @@ SQLite: use an online SQLite backup tool or stop the Node process before copying
 Test account export, sign-in, saved session resumption, attempt counts, and due schedules after restoration. A JSON profile export is a portability artifact, not a complete infrastructure backup or an implemented import/restore facility.
 
 ## Release verification
+
+Both Playwright configs now launch their own development server with a fresh SQLite database under the OS temporary directory. They override inherited DATABASE_URL, SQLITE_PATH, APP_ORIGIN, COOKIE_SECURE and SMTP_URL, and refuse to reuse a listening server. Keep ports 3100 (GUI) and 3001 (HTTP) free; E2E_BASE_URL cannot select another instance. Run the suites sequentially because Next build output is shared. Synthetic databases are retained for diagnosis; do not use these suites to test a running deployment. PostgreSQL acceptance remains a separate task against a disposable database.
 
 Run unit/integration tests, typecheck, content validation, production build, and desktop/mobile browser workflows. Test SMTP and the exact PostgreSQL version in the deployment environment. Use `TEST_DATABASE_URL` only with a disposable empty Postgres database for the integration suite; never point tests at a live learner database. The blueprint unit test intentionally uses isolated SQLite.
 

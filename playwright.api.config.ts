@@ -1,7 +1,7 @@
 import { defineConfig } from "@playwright/test";
-const origin = process.env.E2E_BASE_URL ?? "http://127.0.0.1:3001";
-if (!["127.0.0.1", "localhost"].includes(new URL(origin).hostname))
-  throw Error("HTTP E2E fixtures may only target a local test server.");
+import { isolatedE2EServer } from "./scripts/e2e-server.mjs";
+const server = isolatedE2EServer(3001, process.env.E2E_BASE_URL);
+const origin = server.origin;
 export default defineConfig({
   testDir: "./tests/http-e2e",
   workers: 1,
@@ -9,5 +9,6 @@ export default defineConfig({
   timeout: 60000,
   reporter: "list",
   use: { baseURL: origin, extraHTTPHeaders: { Origin: origin } },
+  webServer: server.webServer,
   outputDir: "test-results/http",
 });
