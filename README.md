@@ -1,6 +1,10 @@
 # SecQuest
 
-A working, independent Security+ learning workspace aligned to the publicly available **SY0-801 V8 objectives, document v2.0**, checked on **October 27, 2026**.
+An unofficial Security+ learning workspace with original practice, spaced review, timed mocks and private study notes. Built with Next.js, React and TypeScript, with SQLite locally and PostgreSQL for server deployments. The bundled **SY0-801 V8 objectives, document v2.0** were checked on **October 27, 2026**; this is not a claim of current exam availability or official affiliation.
+
+[Project guide](https://jakepanlilio2000.github.io/SecQuest/) · [Source](https://github.com/jakepanlilio2000/SecQuest/tree/master) · [Deployment and recovery](docs/DEPLOYMENT.md)
+
+The default branch is **master**. GitHub Pages is configured for a separate project information and setup guide, published after this change is merged and CI passes. It offers no accounts, sign-in or saved learning progress. The learning application requires a Node server and SQL database; no server production host is selected.
 
 This release is an operational foundation, not completion of the entire master brief. It contains **44 original starter questions across all 27 objectives**, six question formats, persistent adaptive review, timed mock practice, and five defensive simulations. The 600-question target and independent subject-matter approval are **not complete**. See [implementation status](docs/STATUS.md) and [content provenance](docs/CONTENT.md).
 
@@ -44,9 +48,10 @@ For an existing database, back it up before first starting this release: `npm ru
 
 ```powershell
 npm test
-npm run typecheck
+npm run lint
 npm run content:validate
 npm run build
+npm run typecheck
 npm start
 ```
 
@@ -58,7 +63,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Browser QA in this implementation used the connected browser tool; the standalone Playwright runner is included but was not executed in this environment. Docker/Postgres and SMTP delivery also require deployment-environment verification. See [QA evidence](docs/QA.md).
+Recent local validation passed 72 unit/integration tests, two HTTP E2E tests, desktop/mobile Chromium workflows, lint, typecheck, content validation and production build. It used Node 22.14 with engine warnings; GitHub CI uses Node 24 and is the merge gate. Build before standalone typechecking on a clean checkout to generate Next route types. Docker/Postgres, SMTP and independent accessibility/security acceptance remain outstanding. See [QA evidence](docs/QA.md) for historical results.
 
 ## Content administration
 
@@ -93,7 +98,7 @@ CompTIA and Security+ are their respective owners' marks. SecQuest is unofficial
 
 Official shadcn MCP is configured and actual registry calls verified. **Restart Codex for native shadcn tools in a new session.** Six scoped shadcn primitives refine the current interface. New features include private note revision restoration and recall cards, weekly missions/personal bests, optional sharing/sounds and unlocked accents, four-week/elapsed-time insights, verification-token workflow, versioned review policies and duplicate-review assistance. SMTP delivery remains unavailable without configuration.
 
-Current checks: **70 tests**, **2 real HTTP E2E tests**, lint, TypeScript, content validation and optimized build pass. Production dependency audit has zero vulnerabilities; three low development-tool findings await an upstream fix. See [final implementation audit](FINAL_IMPLEMENTATION_AUDIT.md) and [feature statuses](IMPLEMENTATION_GAP_ANALYSIS.md).
+Historical October 28 checks: **70 tests**, **2 HTTP E2E tests**, lint, TypeScript, content validation and optimized build passed. The dependency audit recorded in the [final implementation audit](FINAL_IMPLEMENTATION_AUDIT.md) is a historical snapshot: the recent lockfile install reported 10 advisories, so a clean current dependency audit is not claimed. See [feature statuses](IMPLEMENTATION_GAP_ANALYSIS.md) for remaining product work.
 
 ```powershell
 npm run lint

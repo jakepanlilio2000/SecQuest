@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SecQuest: an unofficial Security+ learning workspace. Project information and local setup guide.">
+  <title>SecQuest — Security+ learning workspace</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="wrap"><a class="brand" href="./">SecQuest</a><nav aria-label="Project"><a href="#setup">Setup</a><a href="#scope">Scope</a><a href="https://github.com/jakepanlilio2000/SecQuest">Source code</a></nav></header>
+  <main id="main" class="wrap">
+    <section class="intro">
+      <p class="eyebrow">UNOFFICIAL SECURITY+ LEARNING WORKSPACE</p>
+      <h1>Understand the concept.<br>Practice the reasoning.</h1>
+      <p class="lead">Original practice, spaced review and personal notes to support a steady study routine.</p>
+      <p class="notice"><strong>This is the project guide.</strong> The learning app runs on a Node server with SQL storage. This site offers no accounts, sign-in or saved learning progress.</p>
+      <a class="button" href="#setup">Run SecQuest locally</a>
+      <a class="secondary" href="https://github.com/jakepanlilio2000/SecQuest/blob/master/README.md">Read the README</a>
+    </section>
+    <section id="scope" aria-labelledby="scope-title">
+      <h2 id="scope-title">A workspace for deliberate study</h2>
+      <div class="grid">
+        <article><h3>Practice and revisit</h3><p>Work through original questions, understand each option, and return to scheduled reviews. Timed mocks provide a separate practice workflow.</p></article>
+        <article><h3>Make the knowledge yours</h3><p>Keep personal notes, build flashcards and explore related concepts. The server application preserves note revisions and study records.</p></article>
+        <article><h3>See evidence, not promises</h3><p>Track actual attempts and review history. Forecasts are learning heuristics, not validated exam-score predictions.</p></article>
+      </div>
+      <p class="notice">The starter bank has <strong>44 original questions</strong> mapped to 27 bundled objectives and five fictional labs. Full coverage and independent subject-matter approval remain outstanding. No copied exam questions or official affiliation are claimed.</p>
+    </section>
+    <section id="setup" aria-labelledby="setup-title">
+      <h2 id="setup-title">Start on your own computer</h2>
+      <p>Install Node.js 24 and npm, then clone the <code>master</code> branch:</p>
+      <pre><code>git clone --branch master https://github.com/jakepanlilio2000/SecQuest.git
+cd SecQuest
+npm ci
+npm run dev</code></pre>
+      <p>Open <code>http://127.0.0.1:3000</code>. The app creates its local SQLite database on the first API request. Register your own account; no default credentials are supplied.</p>
+      <p class="notice"><strong>Already studying with SecQuest?</strong> Back up before starting an updated release. Preserve your database, notes and review history. Read the recovery guide before running migrations or changing database engines.</p>
+      <div class="links"><a href="https://github.com/jakepanlilio2000/SecQuest/blob/master/docs/DEPLOYMENT.md">Deployment and recovery</a><a href="https://github.com/jakepanlilio2000/SecQuest/blob/master/docs/SECURITY.md">Security and privacy</a><a href="https://github.com/jakepanlilio2000/SecQuest/blob/master/docs/CONTENT.md">Content provenance</a></div>
+    </section>
+  </main>
+  <footer class="wrap"><p>SecQuest is an independent educational project. CompTIA and Security+ are their respective owners’ marks. No official endorsement or passing-score guarantee is implied.</p><p>This static guide uses no application cookies or browser progress storage. GitHub provides the hosting service.</p></footer>
+</body>
+</html>
