@@ -1,8 +1,12 @@
 # Deployment and recovery
 
-## Current delivery policy: CI only
+## Current delivery policy: project guide on Pages
 
-The owner selected CI only; production deployment is deferred. `.github/workflows/ci.yml` validates pull requests, branch pushes and merge-queue candidates. It does not publish an image, deploy a site, contact a production database or upload test artifacts. No production host, URL or credentials are configured. GitHub Pages cannot run the existing Node API/auth/SQL application; no static export or guest demo is included.
+The owner selected GitHub Pages for project information and setup instructions only, with `master` as the default branch. The learning app remains a standalone Node/SQL service with no selected production host. No static app export or guest demo is included. Pages cannot execute the API, authentication or SQL services.
+
+`.github/workflows/ci.yml` validates PRs, branch pushes and merge-queue candidates. Only a successful push build on default branch `master` may package `site/` and deploy it with GitHub's Pages token and OIDC permissions. PRs do not publish. The Pages artifact is restricted to `index.html` and `style.css`; source trees, backups, databases, environment files and learner records are never included. No external deployment token is required. Set repository Settings → Pages → Source to GitHub Actions. The guide URL is `https://jakepanlilio2000.github.io/SecQuest/`; it becomes live after the reviewed change is merged and the master deployment succeeds.
+
+Verify the guide heading, setup anchor, relative stylesheet, mobile layout and repository links at that URL. There must be no sign-in form, account controls or progress storage on the guide. Roll back a guide change with a reviewed revert PR to master; successful validation republishes that static revision. This does not roll back or affect learner SQL data. Repository description/default-branch settings were updated with explicit owner authorization; branch protection rules remain unchanged.
 
 The `Validation` job uses GitHub-hosted Ubuntu with Node 24 (also the Docker image's runtime major), SHA-pinned checkout/setup actions, read-only contents permission, no persisted checkout credentials and cancellation of superseded runs. Only npm's download cache is cached, keyed by the lockfile through setup-node; node_modules, Next output, databases, environment files and credentials are not cached. `npm ci` enforces the lockfile. No workflow step receives repository secrets. Keep PR jobs on disposable GitHub-hosted runners and use `pull_request`, never privileged `pull_request_target` execution of PR code.
 
@@ -10,11 +14,11 @@ Required job steps: lockfile install, lint, typecheck, unit/integration tests, c
 
 ### Repository setup and PR verification
 
-1. Apply this change on a feature branch in the actual Git checkout and open a PR. This supplied directory has no `.git`/remote metadata, so branch protections, the default branch and remote workflow execution could not be inspected here. No repository settings have been changed.
+1. Open a PR from the review branch into `master`. The Git checkout is in `.commit-checkout`; it preserves the merged history originally on main. The owner authorized master as the new default. No branches were force-pushed or deleted.
 2. Enable Actions under the repository's existing security policy. An administrator should configure the protected default branch/ruleset to require PR review and the `Validation` status from this workflow, with changes up to date (or a merge queue). Confirm the status name in the first actual run before making it required. Do not allow direct/force pushes or deletion. Require appropriate review for workflow changes. These are setup instructions, not settings this change enforces.
 3. Inspect the PR diff for unexpected workflow permissions, secret references, dependency changes and data files. Check that both pinned action SHAs belong to their official repositories before updating them.
-4. Verify the PR check at the repository's **Pull requests → PR → Checks → Validation** and its **Actions → SecQuest CI** run. There is no public preview URL. Inspect failed logs before retrying; never disable a required check to obtain a passing result. Fork PRs may require maintainer approval to run.
-5. Merge through the protected-default-branch PR process only when the reviewed revision's required checks pass. The resulting push validates the merged revision again. Merging performs no production release under the current policy.
+4. Verify the PR check at the repository's **Pull requests → PR → Checks → Validation** and its **Actions → SecQuest CI** run. There is no PR deployment URL. Inspect failed logs before retrying; never disable a required check to obtain a passing result. Fork PRs may require maintainer approval to run.
+5. Merge through the default-branch PR process only when the reviewed revision's required checks pass. The resulting push validates the merged revision again, then publishes the static guide. It does not release the learning application's server.
 
 Official references: [GitHub secure workflow use](https://docs.github.com/en/actions/reference/security/secure-use), [workflow concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency), [Playwright CI setup](https://playwright.dev/docs/ci-intro).
 
