@@ -99,8 +99,8 @@ Current checks: **70 tests**, **2 real HTTP E2E tests**, lint, TypeScript, conte
 npm run lint
 npm run mcp:verify
 npm run progression:backfill
-# Against an already-running isolated local QA server at port 3001:
+# Starts its own isolated local QA server at port 3001:
 npm run test:e2e:api
 ```
 
-The HTTP suite uses synthetic accounts and writes to the target server's database: run it only against an isolated QA instance. Standalone GUI Playwright execution remains unverified here; connected-browser checks cover three viewports. Development tooling requires Node ^22.18.0 or >=24.11.0, tested 26.12. The old minimum is superseded.
+Both E2E suites start their own server with a fresh temporary SQLite database, blank DATABASE_URL and SMTP_URL, and no server reuse. Ports 3100 (GUI) and 3001 (HTTP) must be free. E2E_BASE_URL may not redirect either suite to another instance. Run the suites sequentially because they share Next development build output. Temporary databases contain synthetic fixtures and are retained in the OS temporary directory for diagnosis. These configuration changes have focused automated coverage; full Playwright execution still requires an installed toolchain. Development tooling requires Node ^22.18.0 or >=24.11.0. Historical release results above do not certify later changes.

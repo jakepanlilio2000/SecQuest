@@ -1,0 +1,66 @@
+name: SecQuest CI
+
+on:
+  pull_request:
+  push:
+    branches: ["**"]
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validation:
+    name: Validation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      CI: "true"
+      NEXT_TELEMETRY_DISABLED: "1"
+      # Never inject deployment secrets. Unit tests allocate synthetic databases;
+      # this fallback and both E2E servers also use disposable runner storage.
+      DATABASE_URL: ""
+      TEST_DATABASE_URL: ""
+      SQLITE_PATH: ${{ runner.temp }}/secquest-ci-fallback.sqlite
+      SMTP_URL: ""
+      APP_ORIGIN: http://localhost:3000
+      COOKIE_SECURE: "false"
+    steps:
+      - name: Check out reviewed source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Unit and integration tests (synthetic SQLite)
+        run: npm test
+      - name: Validate bundled content
+        run: npm run content:validate
+      - name: Production build
+        run: npm run build
+      - name: Typecheck (including generated Next route types)
+        run: npm run typecheck
+
+      # Sequential: the two configs share Next development build output.
+      - name: HTTP workflows (isolated local server)
+        run: npm run test:e2e:api
+      - name: Install Chromium and system dependencies
+        run: npx --no-install playwright install --with-deps chromium
+      - name: Desktop and mobile workflows (isolated local server)
+        run: npm run test:e2e
+
+      # CI only. No deployment credentials, publishing steps or artifact uploads.
