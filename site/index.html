@@ -9,7 +9,7 @@
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
-  <header class="wrap"><a class="brand" href="./">SecQuest</a><nav aria-label="Project"><a href="#setup">Setup</a><a href="#scope">Scope</a><a href="https://github.com/jakepanlilio2000/SecQuest">Source code</a></nav></header>
+  <header class="wrap"><a class="brand" href="./">SecQuest</a><nav aria-label="Project"><a href="#walkthrough">How it works</a><a href="#contents">Contents</a><a href="#setup">Setup</a><a href="https://github.com/jakepanlilio2000/SecQuest">Source code</a></nav></header>
   <main id="main" class="wrap">
     <section class="intro">
       <p class="eyebrow">UNOFFICIAL SECURITY+ LEARNING WORKSPACE</p>
@@ -17,6 +17,7 @@
       <p class="lead">Original practice, spaced review and personal notes to support a steady study routine.</p>
       <p class="notice"><strong>This is the project guide.</strong> The learning app runs on a Node server with SQL storage. This site offers no accounts, sign-in or saved learning progress.</p>
       <a class="button" href="#setup">Run SecQuest locally</a>
+      <a class="secondary" href="#walkthrough">See a sample study session</a>
       <a class="secondary" href="https://github.com/jakepanlilio2000/SecQuest/blob/master/README.md">Read the README</a>
     </section>
     <section id="scope" aria-labelledby="scope-title">
@@ -27,6 +28,63 @@
         <article><h3>See evidence, not promises</h3><p>Track actual attempts and review history. Forecasts are learning heuristics, not validated exam-score predictions.</p></article>
       </div>
       <p class="notice">The starter bank has <strong>44 original questions</strong> mapped to 27 bundled objectives and five fictional labs. Full coverage and independent subject-matter approval remain outstanding. No copied exam questions or official affiliation are claimed.</p>
+    </section>
+    <section id="walkthrough" aria-labelledby="walkthrough-title">
+      <p class="eyebrow">FROM FIRST SIGN-IN TO YOUR NEXT REVIEW</p>
+      <h2 id="walkthrough-title">A study session, step by step</h2>
+      <p>Follow Alex, a fictional learner, through the running application. Expand the examples to see what happens. These are illustrations, not a live demo or an account you can use.</p>
+      <ol class="journey">
+        <li>
+          <h3>Create your own account</h3>
+          <p>Run the app using the setup below, then choose <strong>Start your quest</strong>. Enter your display name, email and a unique passphrase of at least 15 characters. Select <strong>Create account</strong>.</p>
+          <details open>
+            <summary>Example: first visit and returning sign-in</summary>
+            <div class="example">
+              <p class="eyebrow">ILLUSTRATION · NO SHARED ACCOUNT</p>
+              <dl class="example-fields"><div><dt>Display name</dt><dd>Alex</dd></div><div><dt>Email address</dt><dd><code>alex@example.test</code> (fictional)</dd></div><div><dt>Password</dt><dd>Your own private passphrase; never shown in this guide.</dd></div></dl>
+              <p>On a later visit, choose <strong>Sign in</strong> and use the email and passphrase you registered in your running app. The sample address above is not a working login. Password recovery requires email delivery configured by the operator.</p>
+            </div>
+          </details>
+        </li>
+        <li>
+          <h3>Set a manageable study goal</h3>
+          <p>Choose the bundled certification, a daily goal of 10, 20 or 40 minutes, and an optional target date. Select <strong>Open my command center</strong>.</p>
+          <details><summary>Example: Alex's first dashboard</summary><div class="example"><p>Alex chooses 20 minutes and leaves the exam date blank. The command center shows a starting point for learning, review counts and saved sessions. Study history builds from actual answers; a new account has no previous results.</p><p>Check current official exam objectives and availability before booking an exam. The app's bundled objectives are a dated alignment reference.</p></div></details>
+        </li>
+        <li>
+          <h3>Answer, then understand the explanation</h3>
+          <p>Select <strong>Start learning</strong>, or open the question bank to choose a topic. Read the scenario, select your answer and choose <strong>Check answer</strong>. Learning feedback explains the concept and each option.</p>
+          <details><summary>Example: learning least privilege</summary><div class="example"><p>A bundled scenario asks how to let a payroll analyst read salary reports without changing salaries. The learning task is to connect the requested work to the minimum permissions needed.</p><p>After answering, use the explanation to identify the boundary between reading and changing data. This is a walkthrough of existing starter content, not an official exam question.</p><p>In learning mode, feedback appears after an answer. In an active timed mock, explanations wait until the final report.</p></div></details>
+        </li>
+        <li>
+          <h3>Turn a mistake into a review</h3>
+          <p>Missed answers enter your review schedule. When enough questions remain, an item can return after intervening practice; otherwise it is deferred. A quick retry is kept distinct from later recall.</p>
+          <details><summary>Example: revisit the idea later</summary><div class="example"><p>Alex misses a question, reads the explanation and continues. On a later visit, <strong>Weakness recovery</strong> and due-review counts help Alex return to that material. A correct repeat does not mean the entire topic has been mastered.</p></div></details>
+        </li>
+        <li>
+          <h3>Keep notes and resume your work</h3>
+          <p>Use <strong>Save as flashcard</strong> to revisit a concept, or write your own explanation in <strong>My Notebook</strong>. Notes support folders, tags and revision history. Use <strong>Save &amp; exit</strong> to leave a study session and return to it later.</p>
+          <details><summary>Example: save a personal explanation</summary><div class="example"><p>Alex writes a short least-privilege reminder in their own words. Before leaving the notebook, Alex checks that autosave has finished. The running app stores the note and study records in its SQL database.</p><p>Signing in to the same running installation brings back Alex's records. A different installation or device does not automatically have them. Back up the database before moving or updating it.</p></div></details>
+        </li>
+        <li>
+          <h3>Try a timed mock when you are ready</h3>
+          <p>Open <strong>Mock exams</strong>, choose the available question count and start the timer. Answers save as drafts; correctness stays hidden while the exam is active. Submit to see the report, or let the server-enforced time limit expire.</p>
+          <details><summary>Example: learn from the report</summary><div class="example"><p>Alex reviews the final explanations and chooses a topic to practise next. The score describes that practice session. It does not predict an official passing result, and the 44-item starter bank cannot supply 90 distinct mock questions.</p></div></details>
+        </li>
+      </ol>
+      <p class="notice"><strong>Ready to try the real workspace?</strong> Follow the local setup below. This guide does not accept credentials, create accounts or save progress.</p>
+    </section>
+    <section id="contents" aria-labelledby="contents-title">
+      <h2 id="contents-title">What you can explore</h2>
+      <div class="grid">
+        <article><h3>Questions and explanations</h3><p>44 distinct original starter questions mapped to 27 bundled objectives. The engine supports single answer, scenarios, multiple response, matching, ordering and fictional log analysis.</p></article>
+        <article><h3>Library and flashcards</h3><p>Browse 58 foundation concept lessons, look up related ideas and make personal flashcards. The concept companion retrieves stored material; it is not a live external AI chat.</p></article>
+        <article><h3>Five defensive labs</h3><p>Work through fictional firewall, incident-response, certificate-validation, cloud-permission and AI trust-boundary exercises. They do not connect to real targets.</p></article>
+        <article><h3>Personal notebook</h3><p>Write Markdown notes, organize folders and tags, search your entries, restore earlier revisions and export your writing.</p></article>
+        <article><h3>Plans and progress</h3><p>Set a study routine, follow due reviews, examine performance history and earn learning milestones. Progress reflects the records in your running app.</p></article>
+        <article><h3>Related concepts</h3><p>Explore the knowledge map, review possible knowledge gaps and inspect schedule-based retention forecasts. These signals are evidence-limited heuristics, not a diagnosis or exam guarantee.</p></article>
+      </div>
+      <p>The starter collection is incomplete and has not received independent subject-matter approval. Use it alongside current official objectives and trusted study resources. <a href="https://github.com/jakepanlilio2000/SecQuest/blob/master/docs/CONTENT.md">Read about the material and its sources.</a></p>
     </section>
     <section id="setup" aria-labelledby="setup-title">
       <h2 id="setup-title">Start on your own computer</h2>

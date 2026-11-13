@@ -6,7 +6,7 @@ body { margin: 0; background: var(--bg); color: var(--text); font-size: 16px; li
 header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1.5rem; border-bottom: 1px solid var(--border); }
 a { color: var(--cyan); text-underline-offset: .22em; }
 a:hover { text-decoration-thickness: 2px; }
-a:focus-visible { outline: 3px solid var(--cyan); outline-offset: 5px; }
+a:focus-visible, summary:focus-visible { outline: 3px solid var(--cyan); outline-offset: 5px; }
 .brand { color: var(--text); font-size: 1.4rem; font-weight: 700; text-decoration: none; }
 nav, .links { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; }
 nav a { padding-block: .5rem; }
@@ -29,5 +29,15 @@ pre code { overflow-wrap: normal; }
 footer { border-top: 1px solid var(--border); padding-block: 2rem; font-size: .875rem; }
 .skip { position: absolute; top: -8rem; left: 1rem; background: var(--surface); padding: .75rem; }
 .skip:focus { top: 1rem; }
+.journey { padding-left: 1.75rem; }
+.journey > li { padding: 0 0 1.75rem .75rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+.journey > li::marker { color: var(--cyan); font-weight: 700; }
+details { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); margin-top: 1rem; }
+summary { cursor: pointer; padding: 1rem 1.25rem; font-weight: 600; }
+.example { padding: 0 1.25rem 1rem; }
+.example-fields { margin: 1rem 0; }
+.example-fields > div { padding-block: .5rem; border-bottom: 1px solid var(--border); }
+.example-fields dt { color: var(--muted); font-size: .875rem; }
+.example-fields dd { margin: .25rem 0; }
 @media (max-width: 800px) { .grid { grid-template-columns: 1fr; gap: 1rem; } .intro { padding-top: 2rem; } }
 @media (max-width: 480px) { .wrap { width: calc(100% - 2rem); } header { align-items: flex-start; flex-direction: column; } nav { gap: 1rem; } }
