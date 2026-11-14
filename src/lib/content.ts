@@ -5,6 +5,7 @@ import { questions } from "../../content/questions";
 import { db, first, migrate, type Database } from "./db";
 import { questionSchema, type Question, type PublicQuestion } from "./types";
 import { seedIntelligence } from "./intelligence-store";
+import { seedCertificationRegistry } from "./certifications";
 export { blueprint };
 export async function currentBlueprint(
   database = db(),
@@ -190,6 +191,7 @@ export async function seed(database = db()) {
       await saveRevision(tx, q, "original-seed-editorial");
     }
     await seedIntelligence(tx);
+    await seedCertificationRegistry(tx);
   });
 }
 const globalReady = globalThis as unknown as { secquestReady?: Promise<void> };
