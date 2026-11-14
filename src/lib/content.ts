@@ -6,7 +6,17 @@ import { db, first, migrate, type Database } from "./db";
 import { questionSchema, type Question, type PublicQuestion } from "./types";
 import { seedIntelligence } from "./intelligence-store";
 import { seedCertificationRegistry } from "./certifications";
+import { AppError } from "./errors";
 export { blueprint };
+// Fixed SQL for a question_revisions alias `r`; bind the exam code twice.
+// A bare objective (for example 1.1) never establishes an exam identity.
+export const questionExamScope = `
+  EXISTS (SELECT 1 FROM question_objectives qo
+    JOIN objectives o ON o.id=qo.objective_id JOIN domains d ON d.id=o.domain_id
+    WHERE qo.question_id=r.question_id AND qo.revision=r.revision AND d.exam_code=?)
+  AND NOT EXISTS (SELECT 1 FROM question_objectives qo
+    JOIN objectives o ON o.id=qo.objective_id JOIN domains d ON d.id=o.domain_id
+    WHERE qo.question_id=r.question_id AND qo.revision=r.revision AND d.exam_code<>?)`;
 export async function currentBlueprint(
   database = db(),
 ): Promise<typeof blueprint> {
@@ -21,9 +31,12 @@ export const fingerprint = (prompt: string) =>
   createHash("sha256")
     .update(prompt.toLowerCase().replace(/[^a-z0-9]/g, ""))
     .digest("hex");
-export function validateQuestion(input: unknown): Question {
+export function validateQuestion(
+  input: unknown,
+  exam: Pick<typeof blueprint, "objectives"> = blueprint,
+): Question {
   const q = questionSchema.parse(input);
-  if (!blueprint.objectives.some((o) => o.id === q.objective))
+  if (!exam.objectives.some((o) => o.id === q.objective))
     throw Error("Unknown objective");
   if (
     q.sources.some(
@@ -84,7 +97,30 @@ export function publicQuestion(q: Question): PublicQuestion {
       ),
   };
 }
-export async function saveRevision(tx: Database, q: Question, actor: string) {
+export async function saveRevision(
+  tx: Database,
+  q: Question,
+  actor: string,
+  examCode = blueprint.code,
+) {
+  if (
+    !(await first(
+      tx,
+      "SELECT o.id FROM objectives o JOIN domains d ON d.id=o.domain_id WHERE o.id=? AND d.exam_code=?",
+      [`${examCode}:${q.objective}`, examCode],
+    ))
+  )
+    throw new AppError("Unknown objective for this exam");
+  // Every older revision must have an unambiguous identity in the same exam.
+  // Do not relabel an existing ID, including one with missing ownership links.
+  if (
+    await first(
+      tx,
+      `SELECT r.revision FROM question_revisions r WHERE r.question_id=? AND NOT (${questionExamScope}) LIMIT 1`,
+      [q.id, examCode, examCode],
+    )
+  )
+    throw new AppError("A question cannot move between exams", 409);
   const now = new Date().toISOString();
   await tx.run(
     "INSERT INTO question_revisions(question_id,revision,content,created_by,created_at) VALUES (?,?,?,?,?)",
@@ -104,7 +140,7 @@ export async function saveRevision(tx: Database, q: Question, actor: string) {
     );
   await tx.run(
     "INSERT INTO question_objectives(question_id,revision,objective_id) VALUES (?,?,?)",
-    [q.id, q.revision, `${blueprint.code}:${q.objective}`],
+    [q.id, q.revision, `${examCode}:${q.objective}`],
   );
   for (const category of new Set(q.categories))
     await tx.run(
@@ -214,10 +250,11 @@ export async function getQuestion(
   if (!row) throw Error("Question revision missing");
   return JSON.parse(row.content) as Question;
 }
-export async function published(database = db()) {
+export async function published(database = db(), examCode = blueprint.code) {
   return (
     await database.all<{ content: string }>(
-      `SELECT r.content FROM questions q JOIN question_revisions r ON r.question_id=q.id AND r.revision=q.current_revision WHERE q.status='published'`,
+      `SELECT r.content FROM questions q JOIN question_revisions r ON r.question_id=q.id AND r.revision=q.current_revision WHERE q.status='published' AND ${questionExamScope}`,
+      [examCode, examCode],
     )
   ).map((r) => JSON.parse(r.content) as Question);
 }

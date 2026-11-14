@@ -13,7 +13,11 @@ export const questionSchema = z.object({
     "ordering",
     "log",
   ]),
-  objective: z.string().regex(/^[1-5]\.\d+$/),
+  // Syntax only: validateQuestion must check the selected objective tree.
+  objective: z
+    .string()
+    .max(20)
+    .regex(/^[1-9]\d*\.\d+$/),
   difficulty: z.enum(["easy", "medium", "hard", "expert"]),
   prompt: z.string().min(25).max(6000),
   concept: z.string().min(2).max(100),

@@ -9,6 +9,7 @@ import {
   fingerprint,
   getQuestion,
   published,
+  questionExamScope,
   publicQuestion,
   ready,
   saveRevision,
@@ -391,8 +392,8 @@ export async function handle(req: Request) {
         domain = url.searchParams.get("domain") ?? "",
         difficulty = url.searchParams.get("difficulty") ?? "",
         type = url.searchParams.get("type") ?? "";
-      const conditions = ["q.status='published'"],
-        params: (string | number)[] = [];
+      const conditions = ["q.status='published'", questionExamScope],
+        params: (string | number)[] = [blueprint.code, blueprint.code];
       if (search) {
         conditions.push("LOWER(r.content) LIKE ?");
         params.push("%" + search.replace(/[%_]/g, "") + "%");
@@ -615,8 +616,8 @@ export async function handle(req: Request) {
       if (input.questionId) {
         const row = await first<{ current_revision: number }>(
           db(),
-          "SELECT current_revision FROM questions WHERE id=? AND status='published'",
-          [input.questionId],
+          `SELECT q.current_revision FROM questions q JOIN question_revisions r ON r.question_id=q.id AND r.revision=q.current_revision WHERE q.id=? AND q.status='published' AND ${questionExamScope}`,
+          [input.questionId, blueprint.code, blueprint.code],
         );
         if (!row) throw new AppError("Published concept not found");
         const q = await getQuestion(

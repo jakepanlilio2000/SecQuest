@@ -1,5 +1,7 @@
 # Implementation checklist
 
+Phase 3A adds [exam-bound question reads and revision guards](CERTIFICATION_REGISTRY.md#phase-3a-exam-bound-question-content), with synthetic cross-exam and immutable-history regression coverage. This is one Phase 1B prerequisite; selection and new banks remain disabled pending complete progress/API/analytics isolation and source/editorial approval. No migration or learner-record rewrite is introduced.
+
 Phase 2A adds the authenticated [learner certification catalog](CERTIFICATION_REGISTRY.md#phase-2a-learner-catalog), with dated availability, content readiness, disabled unready tracks and continuation of the existing workspace. Switching and per-exam progress remain blocked on Phase 1B; this is not a completed multi-certification selector.
 
 Phase 1A adds the [certification registry foundation](CERTIFICATION_REGISTRY.md): additive migration 006, first-wave exam identities and a closed readiness gate. Existing learner flows stay on their original SY0-801 bank. Multi-certification APIs, objective imports and the learner selector are not implemented by this slice.
