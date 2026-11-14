@@ -8,8 +8,9 @@ import {
   snapshotForecasts,
   recallEstimate,
 } from "./retention-forecast";
-import type { Attempt, Review, Question } from "./types";
+import type { Attempt, Review } from "./types";
 import type { NotebookEntry } from "./intelligence-types";
+import { blueprint, published, questionExamScope } from "./content";
 export async function intelligenceFor(
   user: string,
   options: { snapshot?: boolean; conceptId?: string } = {},
@@ -29,10 +30,7 @@ export async function intelligenceFor(
       database.all<Review>("SELECT * FROM review_schedules WHERE user_id=?", [
         user,
       ]),
-      database.all<{ content: string }>(
-        "SELECT r.content FROM questions q JOIN question_revisions r ON r.question_id=q.id AND r.revision=q.current_revision WHERE q.status=?",
-        ["published"],
-      ),
+      published(database),
       database.all<
         Pick<
           NotebookEntry,
@@ -69,15 +67,15 @@ export async function intelligenceFor(
       reviews,
     ),
   );
-  const questions = bank.map((r) => JSON.parse(r.content) as Question);
+  const questions = [...bank];
   // Include archived questions already scheduled for this learner without publishing their answers.
   for (const review of reviews.filter(
     (r) => !questions.some((q) => q.id === r.question_id),
   )) {
     const row = await first<{ content: string }>(
       database,
-      "SELECT r.content FROM questions q JOIN question_revisions r ON r.question_id=q.id AND r.revision=q.current_revision WHERE q.id=?",
-      [review.question_id],
+      `SELECT r.content FROM questions q JOIN question_revisions r ON r.question_id=q.id AND r.revision=q.current_revision WHERE q.id=? AND ${questionExamScope}`,
+      [review.question_id, blueprint.code, blueprint.code],
     );
     if (row) questions.push(JSON.parse(row.content));
   }
@@ -131,8 +129,7 @@ export async function intelligenceFor(
     unmappedMistakes: Number(unmapped?.n ?? 0),
     pendingBackfill: Number(pending?.n ?? 0),
     path,
-    availableQuestions: bank.map((r) => {
-      const q = JSON.parse(r.content) as Question;
+    availableQuestions: bank.map((q) => {
       return {
         id: q.id,
         revision: q.revision,

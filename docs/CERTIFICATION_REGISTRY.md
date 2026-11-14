@@ -1,5 +1,15 @@
 # Certification registry foundation — Phase 1A
 
+## Phase 3A: exam-bound question content
+
+Published question reads now use the exam identity from revision-specific objective → domain → exam links, rather than a bare objective number. `published(database, examCode)` defaults to the existing SY0-801 workspace. The question catalog, all six new-session modes, question-derived library/tutor results, forecast question candidates, question-linked flashcard creation and dashboard bank count use that boundary. Revisions with no exam links or links to multiple exams are excluded from those reads; their rows are retained for investigation, not guessed or repaired. Existing immutable session/revision reads remain available.
+
+`saveRevision` checks that the objective belongs to the explicit exam and that every older revision belongs unambiguously to that same exam before writing. A reused question ID cannot move across exams. Existing editorial transactions roll back their preceding status/current-revision changes when this guard rejects an edit. Objective syntax permits domains beyond five, but `validateQuestion(input, objectiveTree)` still requires membership in the supplied tree; legacy API/import calls continue to use the bundled tree. This does not verify or publish any new objective tree or question bank.
+
+No migration, backfill, account-setting change or learner-data rewrite is included. The synthetic regression fixture tests repeated objective numbers across two exams, a sixth domain, missing/mixed links, rejected-write rollback, all session modes, and preservation of old revision references, attempts and due schedules after an allowed edit. Normal API throttle and intelligence bookkeeping still apply. PostgreSQL execution remains a release prerequisite, not an established result of SQLite checks.
+
+This completes a content-boundary slice of Phase 1B, not full multi-exam isolation. User exam selection, per-exam plans/notes/cards, session resume/answer exam enforcement, historical attempt analytics, graph/misconception ownership and editorial exam selection still need separate work before activation. The public catalog continues to return `switchingEnabled: false`. Any pre-existing ambiguous links need operator review before new-study availability can be restored; do not delete the questions, revisions or related learner records to make checks pass.
+
 ## Phase 2A: learner catalog
 
 The workspace now has a Certifications view at `/?view=certifications`, with an authenticated, rate-limited `GET /api/certifications` metadata projection. It uses existing buttons, badges, skeleton and empty/error patterns. Cards group exams by generation, explain A+'s same-generation two-core requirement, separate official exam availability from SecQuest content readiness, and display evidence dates. The current starter workspace has a continuation action; other study actions are disabled with explanations. Loading, retry, empty and desktop/mobile states have browser coverage.

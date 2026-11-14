@@ -1,5 +1,5 @@
 import { db, first } from "./db";
-import { blueprint } from "./content";
+import { blueprint, questionExamScope } from "./content";
 import type { Attempt, Review, Session, Feedback } from "./types";
 import { rankFor } from "./types";
 import { evidenceMastery } from "./mastery";
@@ -67,7 +67,8 @@ export async function overview(user: string) {
       ),
       first<{ n: number }>(
         database,
-        "SELECT COUNT(*) AS n FROM questions WHERE status='published'",
+        `SELECT COUNT(*) AS n FROM questions q JOIN question_revisions r ON r.question_id=q.id AND r.revision=q.current_revision WHERE q.status='published' AND ${questionExamScope}`,
+        [blueprint.code, blueprint.code],
       ),
     ]);
   const firsts = attempts.filter((a) => a.first_attempt),
