@@ -1,5 +1,7 @@
 # Implementation checklist
 
+Phase 2A adds the authenticated [learner certification catalog](CERTIFICATION_REGISTRY.md#phase-2a-learner-catalog), with dated availability, content readiness, disabled unready tracks and continuation of the existing workspace. Switching and per-exam progress remain blocked on Phase 1B; this is not a completed multi-certification selector.
+
 Phase 1A adds the [certification registry foundation](CERTIFICATION_REGISTRY.md): additive migration 006, first-wave exam identities and a closed readiness gate. Existing learner flows stay on their original SY0-801 bank. Multi-certification APIs, objective imports and the learner selector are not implemented by this slice.
 
 Multi-certification Phase 0 research was recorded on November 14, 2026: see the [official-source catalog and Phase 1 decisions](CERTIFICATION_CATALOG.md). No new certification is implemented or enabled by that research. In particular, SY0-701 is currently available; the existing SY0-801 content is aligned to an upcoming exam scheduled for November 17. Preserve its identity and learner history. The implementation snapshot below remains dated October 28.

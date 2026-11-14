@@ -50,11 +50,13 @@ import {
   SheetDescription,
 } from "./ui/sheet";
 import { Notebook } from "./notebook";
+import { Certifications } from "./certifications";
 const nav: { section: string; items: [string, string, LucideIcon][] }[] = [
   {
     section: "WORKSPACE",
     items: [
       ["dashboard", "Command center", LayoutDashboard],
+      ["certifications", "Certifications", GraduationCap],
       ["learn", "Learning paths", BrainCircuit],
       ["bank", "Question bank", Layers3],
       ["recovery", "Weakness recovery", Target],
@@ -397,6 +399,9 @@ export default function SecQuest() {
               busy={busy}
               initialObjective={params.get("objective") ?? ""}
             />
+          )}
+          {view === "certifications" && (
+            <Certifications currentExam={user.settings.exam} go={go} />
           )}
           {view === "session" && sessionId && (
             <LearningSession
