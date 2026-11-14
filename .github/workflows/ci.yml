@@ -71,6 +71,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
+      - name: Require protected release branch
+        shell: bash
+        run: |
+          if [ "$GITHUB_REF_PROTECTED" != "true" ]; then
+            echo "::error::Pages publication requires protected master. Configure required PR review and the Validation check before publishing; see docs/DEPLOYMENT.md."
+            exit 1
+          fi
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
