@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "checkedOn": "2026-11-14",
+  "timeZone": "Australia/Perth",
+  "repositoryBaseline": "b3b5172b055f287b444f375ba50276cbd7d44b35",
+  "method": "Direct public HTTPS retrieval with Invoke-WebRequest; no authentication or TLS bypass. Hashes refer to local HTML captures, which are ignored and not redistributed.",
+  "sources": [
+    {
+      "id": "a-core-1-and-2-v15",
+      "url": "https://www.comptia.org/en-us/certifications/a/core-1-and-2-v15/",
+      "httpStatus": 200,
+      "title": "A+ Core 1 and 2 Certification V15 (New Version) | CompTIA ",
+      "localCaptureSha256": "714e1df30622b74279ed0ad5c16cc3271ee3d82718f1e5d1051184c3bc56b150"
+    },
+    {
+      "id": "a-core-1-v15",
+      "url": "https://www.comptia.org/en-us/certifications/a/core-1-v15/",
+      "httpStatus": 200,
+      "title": "A+ Core 1 Certification V15 (New Version) | CompTIA ",
+      "localCaptureSha256": "8ef719e11ff16b2cb6e6c1ad41c835d0e8a3602ad15a70c7d8db1e71d02df5a9"
+    },
+    {
+      "id": "a-core-2-v15",
+      "url": "https://www.comptia.org/en-us/certifications/a/core-2-v15/",
+      "httpStatus": 200,
+      "title": "A+ Core 2 Certification V15 (New Version) | CompTIA ",
+      "localCaptureSha256": "7c8781efef6c1d0f6faae04cb3c3a4367fd1002af5887ebaae04471fede35207"
+    },
+    {
+      "id": "a-cyber",
+      "url": "https://www.comptia.org/en-us/certifications/a-cyber/",
+      "httpStatus": 200,
+      "title": "a+ Cyber | CompTIA ",
+      "localCaptureSha256": "5e980b40827ea9eaa1450f31432e3a6e337c3cecb5501c0fa77be243418df8ad"
+    },
+    {
+      "id": "a-network",
+      "url": "https://www.comptia.org/en-us/certifications/a-network/",
+      "httpStatus": 200,
+      "title": "a+ Network | CompTIA ",
+      "localCaptureSha256": "7c4aaa8bad85bff3fc5441eda7970d11b0e7e12f2cd4f6d3c7316e272c902acf"
+    },
+    {
+      "id": "a",
+      "url": "https://www.comptia.org/en-us/certifications/a/",
+      "httpStatus": 200,
+      "title": "A+ Certification | CompTIA ",
+      "localCaptureSha256": "676879fbfbedf62f1261293af09fc62de47513b5f200a9119acae77230a8a417"
+    },
+    {
+      "id": "autoops",
+      "url": "https://www.comptia.org/en-us/certifications/autoops/",
+      "httpStatus": 200,
+      "title": "AutoOps+ Certification V1 | CompTIA  ",
+      "localCaptureSha256": "f023059caaf016accc47b3941c07c473eaed1ea4399ffea4194829717aedb681"
+    },
+    {
+      "id": "catalog",
+      "url": "https://www.comptia.org/en-us/certifications/",
+      "httpStatus": 200,
+      "title": "IT, AI, and Data Certifications | CompTIA ",
+      "localCaptureSha256": "a3b231108c10df5ef1453506d124df743984aff1d820a44d9f2bb344509765e9"
+    },
+    {
+      "id": "cloud-essentials",
+      "url": "https://www.comptia.org/en-us/certifications/cloud-essentials/",
+      "httpStatus": 200,
+      "title": "Cloud Essentials | CompTIA ",
+      "localCaptureSha256": "e11f48b2e0a5a6a5cabee0f9363265f56cfcb16ee68c8e13e00f4d9bdc292289"
+    },
+    {
+      "id": "cloud",
+      "url": "https://www.comptia.org/en-us/certifications/cloud/",
+      "httpStatus": 200,
+      "title": "Cloud+ Certification | CompTIA ",
+      "localCaptureSha256": "4eb60e04769bfe6c8a87e17949bbdfb954abfcc4bdeadcf58d3dc368fc051771"
+    },
+    {
+      "id": "cloudnetx",
+      "url": "https://www.comptia.org/en-us/certifications/cloudnetx/",
+      "httpStatus": 200,
+      "title": "CloudNetX Certification | CompTIA ",
+      "localCaptureSha256": "2249c33a79684640df3502cef054a016969ff3d09815cb4b7f5ae902e272f669"
+    },
+    {
+      "id": "cybersecurity-analyst-v3",
+      "url": "https://www.comptia.org/en-us/certifications/cybersecurity-analyst/v3/",
+      "httpStatus": 200,
+      "title": "CySA+ Certification V3 (Retiring Version) | CompTIA  ",
+      "localCaptureSha256": "50c839e8b08907ede93c6ed9c01da52774fb7cc3a6af25b909eea72149d9b348"
+    },
+    {
+      "id": "cybersecurity-analyst-v4",
+      "url": "https://www.comptia.org/en-us/certifications/cybersecurity-analyst/v4/",
+      "httpStatus": 200,
+      "title": "CySA+ Certification V4 (New Version) | CompTIA  ",
+      "localCaptureSha256": "248c84d7eb4cc35b047efb287dd69bc4d9776bc17541982854c30311d0b7ea9c"
+    },
+    {
+      "id": "cybersecurity-analyst",
+      "url": "https://www.comptia.org/en-us/certifications/cybersecurity-analyst/",
+      "httpStatus": 200,
+      "title": "Cybersecurity Analyst+ (CySA+) Certification | CompTIA ",
+      "localCaptureSha256": "86eea91fdaad33aa4207ec36c433e8713a3d4e63708de66861ddfb7d31584a4d"
+    },
+    {
+      "id": "data",
+      "url": "https://www.comptia.org/en-us/certifications/data/",
+      "httpStatus": 200,
+      "title": "Data+ Certification | CompTIA ",
+      "localCaptureSha256": "d253d3dcfbee833e8b922e72a38ac4c3d85772a4fd488e1cf78eecb14e3cbcc9"
+    },
+    {
+      "id": "dataai",
+      "url": "https://www.comptia.org/en-us/certifications/dataai/",
+      "httpStatus": 200,
+      "title": "DataAI (formerly DataX) Certification | CompTIA ",
+      "localCaptureSha256": "331f954bf659a42d4b6685f3e1890ea39947bd328173b03c9aa3a4b4e2a36262"
+    },
+    {
+      "id": "datasys-v1",
+      "url": "https://www.comptia.org/en-us/certifications/datasys/v1/",
+      "httpStatus": 200,
+      "title": "DataSys+ Certification V2 (Retiring Version) | CompTIA ",
+      "localCaptureSha256": "50ea4a8f760792ccb7513218e94b84e29d3fb1219aed9362fe3132221ab1c57d"
+    },
+    {
+      "id": "datasys-v2",
+      "url": "https://www.comptia.org/en-us/certifications/datasys/v2/",
+      "httpStatus": 200,
+      "title": "DataSys+ Certification V2 (New Version) | CompTIA ",
+      "localCaptureSha256": "33740c7d157826fb9c4375d43f4ca88f910163e2d523d3423224fd66e64c2447"
+    },
+    {
+      "id": "datasys",
+      "url": "https://www.comptia.org/en-us/certifications/datasys/",
+      "httpStatus": 200,
+      "title": "DataSys+ (Plus) Certification | CompTIA ",
+      "localCaptureSha256": "02af4646ffeccc57f79f3cf240369cc50c6173abad9e41506c6b6b58827cd924"
+    },
+    {
+      "id": "linux",
+      "url": "https://www.comptia.org/en-us/certifications/linux/",
+      "httpStatus": 200,
+      "title": "Linux+ Certification V8 | CompTIA ",
+      "localCaptureSha256": "066824c80a77e23a0f792a531b8160ae97954a422a212dcd75ee40bfcb62a4e2"
+    },
+    {
+      "id": "network",
+      "url": "https://www.comptia.org/en-us/certifications/network/",
+      "httpStatus": 200,
+      "title": "Network+ (Plus) Certification | CompTIA ",
+      "localCaptureSha256": "7d21d482fff658099afd85d442266bc01a2c5c4383703bbeaa3bab34bf9e5a1d"
+    },
+    {
+      "id": "pentest",
+      "url": "https://www.comptia.org/en-us/certifications/pentest/",
+      "httpStatus": 200,
+      "title": "PenTest+ Certification V3 (New Version) | CompTIA ",
+      "localCaptureSha256": "77b585856fee65e55d4e4e6ee7fd267d5619172925dc9d3a815763c10b032139"
+    },
+    {
+      "id": "project",
+      "url": "https://www.comptia.org/en-us/certifications/project/",
+      "httpStatus": 200,
+      "title": "Project+ (Plus) Certification | CompTIA ",
+      "localCaptureSha256": "0cce6e60ca4748d7cb0f81ef5f1f78d03db261b9d0ed9ac3b28716361ffea1cc"
+    },
+    {
+      "id": "secai",
+      "url": "https://www.comptia.org/en-us/certifications/secai/",
+      "httpStatus": 200,
+      "title": "SecAI+ Certification V1 | CompTIA ",
+      "localCaptureSha256": "3cd7b53b3113acf15e33b164bbe694955e681e7bda9d7bd4934ad469a0322934"
+    },
+    {
+      "id": "secot",
+      "url": "https://www.comptia.org/en-us/certifications/secot/",
+      "httpStatus": 200,
+      "title": "SecOT+ Certification V1 (Pre-Order Now, Launching December 2026) | CompTIA ",
+      "localCaptureSha256": "210f55c0ad011f9e4864d2c9f59cc9d2d08e4eb5275b786ffca03029d7a47e47"
+    },
+    {
+      "id": "security-v7",
+      "url": "https://www.comptia.org/en-us/certifications/security/v7/",
+      "httpStatus": 200,
+      "title": "Security+ (Plus) Certification | CompTIA ",
+      "localCaptureSha256": "fba56d6460baa23ade7163121254c5338399c014b21de0d0d1eef60fd957c6ad"
+    },
+    {
+      "id": "security-v8",
+      "url": "https://www.comptia.org/en-us/certifications/security/v8/",
+      "httpStatus": 200,
+      "title": "Security+ Certification V8 (Coming Soon, Launching November 2026) | CompTIA ",
+      "localCaptureSha256": "5c188d343b5af04924493a0fb805dd3916cc7227e5c8688cbfc683d139c8d875"
+    },
+    {
+      "id": "security",
+      "url": "https://www.comptia.org/en-us/certifications/security/",
+      "httpStatus": 200,
+      "title": "Security+ (Plus) Certification | CompTIA ",
+      "localCaptureSha256": "713c7b721ff0bafe5ba1b24c8cbb4b9c694d4abd0227d4baeb4ef317828a6fb7"
+    },
+    {
+      "id": "securityx",
+      "url": "https://www.comptia.org/en-us/certifications/securityx/",
+      "httpStatus": 200,
+      "title": "SecurityX Certification | CompTIA ",
+      "localCaptureSha256": "3e06ce737fb8b50d2c196aa8182b15aeedb1fc40c19670b08e866912612c1d72"
+    },
+    {
+      "id": "server",
+      "url": "https://www.comptia.org/en-us/certifications/server/",
+      "httpStatus": 200,
+      "title": "Server+ (Plus) Certification | CompTIA ",
+      "localCaptureSha256": "0abbd945ddb5fca80c7c9cfe16053b51aa8eb4b8cb4796869fc3a58f75b45d4d"
+    },
+    {
+      "id": "tech",
+      "url": "https://www.comptia.org/en-us/certifications/tech/",
+      "httpStatus": 200,
+      "title": "Tech+ (Plus) Certification | CompTIA ",
+      "localCaptureSha256": "6f8acc9cdf55781bca5ca20f557c5bd0f9c9716c48f4b49f5f5440c7b1c2f287"
+    }
+  ]
+}
