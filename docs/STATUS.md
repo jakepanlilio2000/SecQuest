@@ -1,5 +1,7 @@
 # Implementation checklist
 
+Multi-certification Phase 0 research was recorded on November 14, 2026: see the [official-source catalog and Phase 1 decisions](CERTIFICATION_CATALOG.md). No new certification is implemented or enabled by that research. In particular, SY0-701 is currently available; the existing SY0-801 content is aligned to an upcoming exam scheduled for November 17. Preserve its identity and learner history. The implementation snapshot below remains dated October 28.
+
 Current verified state: October 28, 2026. Operational local release; independent production acceptance of the full master brief is outstanding. See [final audit](../FINAL_IMPLEMENTATION_AUDIT.md) and [feature gap analysis](../IMPLEMENTATION_GAP_ANALYSIS.md).
 
 | Phase                 | Implemented and checked                                                                                                                                                                                                       | Remaining                                                                                                                                    |
