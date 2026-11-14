@@ -1,5 +1,13 @@
 # Certification registry foundation — Phase 1A
 
+## Phase 2A: learner catalog
+
+The workspace now has a Certifications view at `/?view=certifications`, with an authenticated, rate-limited `GET /api/certifications` metadata projection. It uses existing buttons, badges, skeleton and empty/error patterns. Cards group exams by generation, explain A+'s same-generation two-core requirement, separate official exam availability from SecQuest content readiness, and display evidence dates. The current starter workspace has a continuation action; other study actions are disabled with explanations. Loading, retry, empty and desktop/mobile states have browser coverage.
+
+The endpoint deliberately returns `switchingEnabled: false` even if an operator changes readiness flags. It has no mutation handler, does not expose internal activation flags or learner records, and uses the existing no-store response policy. Like other app requests, normal initialization and rate-limit bookkeeping may run; opening the catalog never changes account settings, attempts or progress. Browser tests use only synthetic accounts in isolated SQLite servers.
+
+This is a read-only catalog, not the completed certification selector. Phase 1B's exam-aware API/content/analytics boundaries are still required before switching or separate progress/mocks are exposed. The existing learner flow and question bank remain unchanged. No migration is added in this UI slice; migration 006 from Phase 1A remains its prerequisite. Pages remains the separate public guide, not this authenticated workspace.
+
 This slice implements identities and preservation boundaries from the [Phase 0 catalog](CERTIFICATION_CATALOG.md). It does not enable multiple-certification learning or replace the existing Security+ flow. The selector, exam-aware API/grading/analytics, per-exam learner settings and complete objective imports remain subsequent slices.
 
 ## Model

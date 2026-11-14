@@ -685,3 +685,36 @@
     min-height: 320px;
   }
 }
+
+.cert-current, .cert-card {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow-wrap: anywhere;
+}
+.cert-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+.cert-current h2 { margin-top: 12px; }
+.cert-current p { max-width: 65ch; margin-bottom: 0; }
+.cert-current .button { flex-shrink: 0; }
+.cert-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.cert-card-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; }
+.cert-card-heading h2 { margin-bottom: 8px; }
+.cert-card-heading h2 span { color: var(--muted); font-size: 14px; }
+.cert-exams { list-style: none; padding: 0; margin: 16px 0; }
+.cert-exams li { padding: 14px 0; border-top: 1px solid var(--border); }
+.cert-exams span { display: block; margin-top: 5px; color: var(--muted); }
+.cert-note { color: var(--muted); font-size: 13px; margin: 16px 0 0; }
+.cert-loading { min-height: 200px; }
+.cert-skeleton { height: 150px; }
+@media (max-width: 800px) {
+  .cert-current { flex-direction: column; align-items: stretch; gap: 16px; }
+  .cert-grid { grid-template-columns: 1fr; }
+  .cert-current, .cert-card { padding: 18px; }
+}

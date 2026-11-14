@@ -54,6 +54,7 @@ import {
 import { loadGraph } from "./intelligence-store";
 import { loadReviewPolicy, reviewPolicySchema } from "./review-policy";
 import { duplicateCandidates } from "./content-similarity";
+import { learnerCertificationCatalog } from "./certifications";
 function validateQuestion(input: unknown) {
   try {
     return validateContentQuestion(input);
@@ -315,6 +316,8 @@ export async function handle(req: Request) {
     }
     if (!(await limit(`api:${user.id}`, 600, 60)))
       throw new AppError("Too many requests. Please slow down.", 429);
+    if (path === "certifications" && method === "GET")
+      return json(await learnerCertificationCatalog());
     if (path === "verification" && method === "GET")
       return json(await verificationStatus(user.id));
     if (path === "verification" && method === "POST") {

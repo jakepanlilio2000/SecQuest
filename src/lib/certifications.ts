@@ -24,6 +24,46 @@ export interface CatalogExam {
   linkedExamCode: string | null;
 }
 
+export type LearnerCatalogExam = Pick<
+  CatalogExam,
+  | "code"
+  | "generationId"
+  | "certificationName"
+  | "version"
+  | "requiredExams"
+  | "name"
+  | "availability"
+  | "checkedOn"
+  | "bankStatus"
+>;
+
+export interface LearnerCertificationCatalog {
+  switchingEnabled: false;
+  exams: LearnerCatalogExam[];
+}
+
+// Whitelist public metadata; neither account data nor internal activation flags
+// belong in the learner catalog. Readiness alone cannot enable switching yet.
+export async function learnerCertificationCatalog(
+  database = db(),
+): Promise<LearnerCertificationCatalog> {
+  const rows = await certificationRegistry(database);
+  return {
+    switchingEnabled: false,
+    exams: rows.map((e) => ({
+      code: e.code,
+      generationId: e.generationId,
+      certificationName: e.certificationName,
+      version: e.version,
+      requiredExams: e.requiredExams,
+      name: e.name,
+      availability: e.availability,
+      checkedOn: e.checkedOn,
+      bankStatus: e.bankStatus,
+    })),
+  };
+}
+
 // Use the caller's seed transaction. Existing catalog/editorial state is retained.
 export async function seedCertificationRegistry(tx: Database) {
   for (const c of certifications)
